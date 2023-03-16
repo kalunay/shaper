@@ -6,7 +6,7 @@ module.exports = {
         return res.status(200).send(item);
     },
     async getAll(req, res){
-        const items = await Objects.find();
+        const items = await Objects.find({objectReady: false});
         return res.status(200).send(items);
     }
 };

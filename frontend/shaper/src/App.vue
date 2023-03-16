@@ -1,17 +1,30 @@
 <template>
-  <nav>
+  <div class="wrapper">
+    <side-bar />
+    <router-view/>
+  </div>
+  <!-- <nav>
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  </nav> -->
 </template>
 
+<script>
+  import SideBar from './components/SideBar.vue';
+  export default {
+    name: 'App',
+    components: {
+      SideBar
+    }
+  }
+</script>
+
 <style>
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 

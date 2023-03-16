@@ -13,6 +13,9 @@
     "bootstrap": "^5.2.3",
     "bootstrap-vue": "^2.23.1",
     "core-js": "^3.8.3",
+    "feather-icons": "^4.29.0",
+    "flatpickr": "^4.6.13",
+    "simplebar-vue": "^2.3.0",
     "vue": "^3.2.47",
     "vue-axios": "^3.5.2",
     "vue-router": "^4.1.6"
@@ -25,7 +28,8 @@
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint-plugin-vue": "^8.0.3",
+    "jquery": "^3.6.4"
   },
   "eslintConfig": {
     "root": true,
