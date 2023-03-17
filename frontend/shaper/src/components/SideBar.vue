@@ -14,17 +14,20 @@
                     :to="`/object/${object.ProjectId}`"
                     :key="`${object.ProjectId}`"
                 >
-                    <li class="sidebar-item "
+                    <li class="sidebar-item"
                     :class="{ 'active': isExactActive }"
                     >
-                        <a class="sidebar-link" :href="href">
-                            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">{{ object.name }}</span>
+                        <a class="sidebar-link show-submenu" :href="href">
+                            <i class="align-middle" data-feather="home"></i> 
+                            <span class="align-middle">{{ object.name }}</span>
+                            <i class="align-middle" data-feather="chevron-down"></i>
                         </a>
-                        <side-bar-apartments :projectId="object.ProjectId" />
+                        <side-bar-apartments :projectId="object.ProjectId" />       
                     </li>
                 </router-link>
 
-            </ul>
+            </ul>            
+
         </div>
     </nav>  
 </template>
@@ -55,10 +58,31 @@
         },
         mounted() {
             this.retrieveObjects();
+
+            (function(){
+                const btn = document.getElementsByClassName("show-submenu");
+
+                btn.addEventListener("click", function () {
+                    console.log(btn);
+                });  
+            })()          
+
         }
     }
 </script>
 
 <style scoped>
-
+    .dropdown-toggle::after {
+        float: right;
+        margin-top: 5px;
+    }
+    .dropdown-toggle.show::after {
+        transform: rotate(-135deg);
+    }
+    .sidebar-link, a.sidebar-link { 
+        padding: .625rem;
+    }
+    .sidebar-link svg:last-child {
+        float: right;
+    }
 </style>

@@ -2,9 +2,7 @@
 import feather from "feather-icons";
 
 setTimeout(()=>{
-    document.addEventListener("DOMContentLoaded", () => {
-        feather.replace();
-    });
-}, 1000)
+    feather.replace();
+  }, 500)
 
 window.feather = feather;
