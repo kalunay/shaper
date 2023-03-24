@@ -1,13 +1,13 @@
 <template>
     <slot>
 
-        <ul class="dropdown-sub-menu" :id="`submenu${projectId}`">
-            <li v-for="(section, indexS) in tree" :key="indexS" class="dropdown">
-                <a href="" role="button" class="sidebar-link" type="button" data-bs-toggle="collapse" :data-bs-target="`#dropdown-menu-floor-${indexS}`" aria-expanded="false" :aria-controls="`dropdown-menu-floor-${indexS}`">Section #{{ indexS }}</a>
-                <ul class="dropdown-sub-menu collapse" :id="`dropdown-menu-floor-${indexS}`">
-                    <li v-for="(floor, indexF) in tree[indexS]" :key="indexF" class="dropdown">
-                        <a href="" class="sidebar-link" type="button" data-bs-toggle="collapse" :data-bs-target="`#dropdown-menu-flat-${indexS}-${indexF}`" aria-expanded="false" :aria-controls="`dropdown-menu-flat-${indexS}-${indexF}`">Floor #{{ indexF }}</a>
-                        <ul class="dropdown-sub-menu collapse" :id="`dropdown-menu-flat-${indexS}-${indexF}`">
+        <ul class="nested" :id="`submenu${projectId}`">
+            <li v-for="(section, indexS) in tree" :key="indexS">
+                <a href="">Section #{{ indexS }}</a> <span class="caret"></span>
+                <ul class="nested">
+                    <li v-for="(floor, indexF) in tree[indexS]" :key="indexF">
+                        <a href="">Floor #{{ indexF }}</a> <span class="caret"></span>
+                        <ul class="nested">
                             <li v-for="flat in tree[indexS][indexF]" :key="`${flat.ObjectID}`">
                                 {{ flat.ObjectCategory }} #{{ flat.ObjectNumber }}
                             </li>
@@ -82,6 +82,16 @@
         },
         mounted(){
             this.retrieveApartments()
+            var toggler = document.getElementsByClassName("caret");
+            var i;
+
+            for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function() {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+                console.log(this.parentElement)
+            });
+            }     
         }
     }
 </script>
@@ -102,4 +112,41 @@
     ul li a {
         padding: 0;
     }
+    ul, #myUL {
+  list-style-type: none;
+}
+
+#myUL {
+  margin: 0;
+  padding: 0;
+}
+
+.caret {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.caret-down::before {
+  -ms-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);  
+}
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
 </style>

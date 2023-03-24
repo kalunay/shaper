@@ -10,7 +10,7 @@ const routes = [
   {
     path: '/object/:id',
     name: 'ObjectInfo',
-    component: HomeView,
+    component: () => import('../views/ObjectInfoView'),
   },
   {
     path: '/about',
