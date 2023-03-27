@@ -38,6 +38,8 @@
     //import SideBarApartments from '@/components/SideBarApartments.vue';
     import ApartmentsDataService from '@/services/ApartmentsDataService';
     import jquery from 'jquery';
+    import router from '../router/index'
+
     window.$ = window.jQuery = require('jquery');
 
     export default {
@@ -60,7 +62,8 @@
                     response.data.forEach(element => {
                         this.defaultData.push({
                             text: element.name,
-                            href: '/object/' + element.ProjectId,
+                            tags: [element.ProjectId],
+                            //href: '/object/' + element.ProjectId,
                             nodes: []
                         });
 
@@ -149,7 +152,10 @@
                     data: MENU_TREE,
                     levels: 1,
                     backColor: 'transparent',
-                    enableLinks: true
+                    enableLinks: true,
+                    onNodeSelected: function(event, data) {
+                        router.push({ path: '/object/' + data.tags[0] })
+                    }
                 });
             },1500);       
 
@@ -166,7 +172,6 @@
     }
 
     #treeview7 {
-        font-size: 1.5em;
         background: transparent;
         width: 100%;
         padding: 10px;

@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/'
+import components from './components'
 //import jQuery from 'jquery'
 import { FeatherIcon } from 'feather-icons'
 //import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -16,4 +17,10 @@ import "../public/js/app"
 
 window.$ = window.jQuery = require('jquery');
 
-createApp(App).use(router).use(FeatherIcon).mount('#app')
+const app = createApp(App)
+
+components.components.forEach(component => {
+    app.component(component.name, component)
+});
+
+app.use(router).use(FeatherIcon).mount('#app')
