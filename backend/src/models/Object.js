@@ -3,13 +3,20 @@ const { model, Schema } = require('mongoose')
 const schema= new Schema({
     ProjestID: {
         type: Number,
-        default: 0
+        default: 0,
+        unique: true
     },
     image: {
         type: String
     },
-    width: Number,
-    height: Number,
+    width: {
+        type: Number,
+        default: 0
+    },
+    height: {
+        type: Number,
+        default: 0
+    },
     houses: Array
 })
 

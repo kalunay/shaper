@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http');
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
 const { router } = require('./src/routes');
 
 // connect to db
@@ -20,6 +21,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload({}));
 
 // routers
 router.forEach(item => {

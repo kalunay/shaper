@@ -8,11 +8,13 @@
 
             <div class="row">
                 <div class="col">
-                    <input class="form-control form-control-lg" id="formFileLg" type="file">
+                    <input class="form-control form-control-lg" name="image" id="file" type="file" ref="file" @change="handleFileUpload()">
                 </div>
 
+                <input type="hidden" v-model="fields.ProjectId">
+
                 <div class="col">
-                    <button type="submit" class="btn btn-primary mb-3">Сохранить</button>
+                    <button type="submit" class="btn btn-primary mb-3" @click="submitFile()">Сохранить</button>
                 </div>
             </div>            
 
@@ -22,6 +24,7 @@
 
 <script>
 import ObjectsDataService from '@/services/ObjectsDataService';
+import ObjectDataService from '@/services/ObjectDataService';
 export default {
     watch: {
         '$route.params': {
@@ -36,6 +39,12 @@ export default {
     data() {
         return {
             object: null,
+            fields: {
+                ProjectId: 0,
+                image: '',
+                width: 0,
+                height: 0
+            }
         }
     },
     methods: {
@@ -43,15 +52,50 @@ export default {
             ObjectsDataService.get(id)
                 .then(response => {
                     this.object = response.data
-                    console.log(this.object)
+                    //console.log(this.object)
                 })
                 .catch(e => {
                     console.log(e)
                 })
+        },
+        handleFileUpload(){
+            this.fields.image = this.$refs.file[0].files[0]
+        },
+        submitFile(){
+            let formData = new FormData();
+            formData.append('file', this.fields.image);
+
+            // let data = {
+            //     ProjestID: this.fields.ProjectId,
+            //     image: this.fields.image.name,
+            // }
+
+            // ObjectDataService.create(data)
+            // .then(response => {
+            //     console.log(response)
+            // })
+            // .catch(e => {
+            //     console.log(e)
+            // })
+
+            //console.log(this.fields.image)
+
+            ObjectDataService.upload(formData)
+            .then(response => {
+                return response
+            })
+            .catch(e => {
+                console.log(e)
+            })
+
+            //console.log(formData);
+
+
         }
     },
     mounted() {
         this.getObject(this.$route.params.id)
+        this.fields.ProjectId = this.$route.params.id
     },
 
 }

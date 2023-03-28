@@ -8,3 +8,4 @@ frontend/shaper/.gitignore
 .gitignore
 frontend/shaper/package.json
 frontend/shaper/package-lock.json
+frontend/shaper/public/images
