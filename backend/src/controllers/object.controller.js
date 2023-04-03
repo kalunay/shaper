@@ -1,14 +1,16 @@
 const { Object } = require('../models');
 
 module.exports = {
-    async getInfo({ params: {id} }, res){
-        const item = await Object.findById(id);
+    async getInfo({ params: id }, res){
+        const item = await Object.find({ProjectId: id.id});
+        console.log(item)
         return res.status(200).send(item)
     },
     async get(req, res){
         return res.status(200).send('swdefibasdfikvgjkzabdfjkvbzjkdv')
     },
     async create({ body }, res){
+        console.log(body)
         const item = new Object(body)
         const newItem = await item.save()
         return res.status(200).send(newItem)
@@ -23,7 +25,7 @@ module.exports = {
     },
     async upload(req, res){
         req.files.file.mv('../frontend/shaper/public/images/' + req.files.file.name);
-        res.end(req.files.file.name)
-        console.log(req.files.file)
+        return res.status(200)
+        //console.log(req.files.file)
     }
 }

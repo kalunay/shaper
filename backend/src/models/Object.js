@@ -1,7 +1,7 @@
 const { model, Schema } = require('mongoose')
 
 const schema= new Schema({
-    ProjestID: {
+    ProjectId: {
         type: Number,
         default: 0,
         unique: true

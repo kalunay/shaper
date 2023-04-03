@@ -14,6 +14,9 @@ class ObjectDataService {
             }    
         )
     }
+    info(ProjectId){
+        return http.get(`/object/${ProjectId}`)
+    }
 }
 
 export default new ObjectDataService()
