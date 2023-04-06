@@ -4,8 +4,11 @@ class ObjectDataService {
     create(data){
         return http.post('/object', data)
     }
+    update(data){
+        return http.post(`/object/update/${data.ProjectId}`, data)
+    }
     upload(data){
-        return http.post('/object/upload', 
+        return http.post('/object/upload/image', 
             data,
             {
                 headers: {

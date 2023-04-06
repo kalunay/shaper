@@ -16,7 +16,7 @@ module.exports = {
         return res.status(200).send(newItem)
     },
     async update({ params: {id}, body }, res){
-        const item = Object.findByIdAndUpdate(id, body, {new: true});
+        const item = await Object.findOneAndUpdate({ProjectId: id}, body, {new: true})
         return res.status(200).send(item)
     },
     async delete({ params: {id} }, res){
@@ -25,7 +25,7 @@ module.exports = {
     },
     async upload(req, res){
         req.files.file.mv('../frontend/shaper/public/images/' + req.files.file.name);
-        return res.status(200)
-        //console.log(req.files.file)
+        console.log(req.files.file)
+        return res.status(200).send(req.files.file)
     }
 }

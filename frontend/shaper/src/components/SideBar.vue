@@ -94,6 +94,7 @@
                                             odjects.forEach(elem => {
                                                 floorObjects.push({
                                                     text: 'Квартира №' + elem.ObjectNumber,  
+                                                    tags: [elem.ProjectId],
                                                     href: '/flat/' + elem.ProjectId + '/' + + elem.ObjectNumber,
                                                 })                                                          
                                             });                                                  
@@ -104,6 +105,7 @@
                                             if(floorObjects.length > 0){
                                                 floorsObjects.push({
                                                     text: 'Этаж №' + response.data[j].Storey,
+                                                    tags: [],
                                                     nodes: floorObjectsSorted                                                
                                                 })
                                             }
@@ -115,6 +117,7 @@
                                     if(floorsObjects.length > 0){
                                         object[0].nodes.push({
                                             text: 'Секция №' + response.data[i].SectionID,
+                                            tags: [],
                                             nodes: floorsObjects
                                         })
                                     }
@@ -194,7 +197,8 @@
     .sidebar {
         width: auto;
         padding: 5px;
-        max-width: min-content;
+        max-width: 100% !important;
+        min-width: 100% !important;
     }
 
     .list-group-item {

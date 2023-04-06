@@ -3,8 +3,9 @@ import App from './App.vue'
 import router from './router/'
 import components from './components'
 //import jQuery from 'jquery'
-import { FeatherIcon } from 'feather-icons'
+//import { FeatherIcon } from 'feather-icons'
 //import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import axios from 'axios';
 
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
@@ -23,4 +24,6 @@ components.components.forEach(component => {
     app.component(component.name, component)
 });
 
-app.use(router).use(FeatherIcon).mount('#app')
+app.config.globalProperties.$axios = axios;
+
+app.use(router).mount('#app')

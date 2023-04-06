@@ -1,8 +1,16 @@
 <template>
-  <div class="wrapper">
-    <side-bar />
-    <router-view/>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-2 col-md-3">
+        <side-bar />
+      </div>
+      <div class="col-lg-10 col-md-9">
+        <router-view/>
+      </div>
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -35,5 +43,10 @@ nav a {
 
 nav a.router-link-exact-active {
   color: #42b983;
+}
+
+.container {
+  width: 100%;
+  max-width: 100% !important;
 }
 </style>
