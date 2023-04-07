@@ -19,33 +19,79 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="btn-group" role="group" aria-label="Basic example">
-                        <button type="button" class="btn btn-danger" @click="clearCanvas()">Clear</button>
-                        <button type="button" class="btn btn-success" @click="saveCanvas()">Save</button>
-
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Zoom
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li v-for="s in listScale" :key="s"><a class="dropdown-item" href="#"
-                                        @click="scaleCanvas(s)">{{ s }}</a></li>
-                            </ul>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
             <div class="row b-main-content">
                 <div class="col-10 b-scroll">
-                    <canvas id="myCanvas" style="border:1px solid #d3d3d3;">
+
+                    <div class="block-btn-group">
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-danger" @click="clearCanvas()">
+                                <i class="glyphicon glyphicon-trash"></i> Очистить
+                            </button>
+
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="glyphicon glyphicon-zoom-in"></i> Увеличить
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li v-for="s in listScale" :key="s">
+                                        <a class="dropdown-item" href="#" @click="scaleCanvas(s)">{{ s }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <input type="color" v-model="colorBrush" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <canvas id="myCanvas">
                         Your browser does not support the HTML5 canvas tag.
                     </canvas>
                 </div>
-                <div class="col-2"> </div>
+                <div class="col-2">
+
+
+                    <!-- <svg :viewBox='this.getSizeForSvg()' xmlns="http://www.w3.org/2000/svg" v-if="coordinits.length > 0">
+                        <path
+                            fill="none"
+                            stroke="red"
+                             :d='this.getPathSvg()' />
+                    </svg> -->
+
+                    <div class="card text-center">
+                        <div class="card-header">
+                            Добавление дома
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label>Координаты</label>
+                                <textarea class="form-control" :value="this.getPathSvg()" disabled rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Заголовок</label>
+                                <input class="form-control" v-model="house.header" type="text" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>№ дома</label>
+                                <input class="form-control" type="number" v-model="house.numHouse" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Номера секций <i>(через запятую)</i></label>
+                                <input class="form-control" type="text" v-model="house.sections" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Описание</label>
+                                <textarea class="form-control" v-model="house.description" rows="2"></textarea>
+                            </div>
+                            <input type="hidden" v-model="house.projectId">
+                            <button type="button" class="btn btn-success w-100" @click="saveObject()">Сохранить</button>
+                        </div>
+                        <div class="card-footer text-body-secondary">
+                            Объект: <i>{{ object[0].name }}</i>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
         </div>
@@ -67,6 +113,11 @@ export default {
                 this.addImageOnCanvas()
             },
             immediate: false,
+        },
+        colorBrush: {
+            handler(newValue) {
+                this.addImageOnCanvas(newValue)
+            }
         }
     },
 
@@ -82,7 +133,25 @@ export default {
             },
             scale: 1,
             listScale: [1, 1.25, 1.5, 1.75, 2],
-            defaultObject: false
+            colorBrush: '#000',
+            defaultObject: false,
+            coordinits: [],
+            svgPath: '',
+            house: {
+                header: '',
+                description: '',
+                projectId: 0,
+                numHouse: 0,
+                sections: '',
+                shapeId: ''
+            },
+            shapes: {
+                shapeId: '',
+                image: '',
+                width: 0,
+                height: 0,
+                coordinates: [],
+            }
         }
     },
     methods: {
@@ -167,6 +236,18 @@ export default {
 
 
         },
+        saveObject(){
+            let dataHouse = {
+                header: this.house.header,
+                description: this.house.description,
+                projectId: this.house.projectId,
+                numHouse: this.house.numHouse,
+                sections: this.house.sections
+            }
+
+            console.log(dataHouse)
+
+        },
         infoObject() {
             ObjectDataService.info(this.fields.ProjectId)
                 .then(response => {
@@ -181,7 +262,7 @@ export default {
                 })
         },
         addImageOnCanvas() {
-            let canvas = document.getElementById("myCanvas");
+            let canvas = document.getElementById("myCanvas")
             canvas.width = this.fields.width
             canvas.height = this.fields.height
             let ctx = canvas.getContext('2d');
@@ -196,38 +277,57 @@ export default {
             newImage.onload = () => {
                 console.log(newImage)
                 // Draw the image onto the context with cropping
-                ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height);
+                ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
             }
 
             ctx.lineWidth = 2;
+            ctx.strokeStyle = this.colorBrush
             //ctx.scale(this.scale, this.scale)
             let sc = this.scale
+            let coordinits = this.coordinits
+            let ds = Math.ceil(this.fields.width / this.fields.height)
             canvas.onmouseup = function (event) {
-                let x = event.offsetX;
-                let y = event.offsetY;
+                let x = event.offsetX
+                let y = event.offsetY
                 ctx.lineTo(x, y); //рисуем линию
-                console.log(Math.ceil(x/sc), Math.ceil(y/sc))
-
-                ctx.stroke();
+                coordinits.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
+                //coordinits.push(Math.ceil(y/sc)/ds)
+                ctx.stroke()
             }
 
         },
         clearCanvas() {
-            let canvas = document.getElementById("myCanvas");
-            let ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, this.fields.width, this.fields.height);
+            let canvas = document.getElementById("myCanvas")
+            let ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, this.fields.width, this.fields.height)
             this.addImageOnCanvas()
+            this.coordinits = []
+            this.house = {
+                header: '',
+                description: '',
+                projectId: 0,
+                numHouse: 0,
+                sections: ''
+            }
         },
         scaleCanvas(scale) {
             this.scale = scale
             this.fields.width *= scale
             this.fields.height *= scale
             this.addImageOnCanvas()
+        },
+        getPathSvg() {
+            return 'M ' + this.coordinits.join(" ") + ' Z'
+        },
+        getSizeForSvg() {
+            let ds = Math.ceil(this.fields.width / this.fields.height)
+            return '0 0 ' + Math.ceil(this.fields.width / ds) + ' ' + Math.ceil(this.fields.height / ds)
         }
     },
     mounted() {
         this.getObject(this.$route.params.id)
         this.fields.ProjectId = this.$route.params.id
+        this.house.projectId = this.$route.params.id
         this.infoObject()
         setTimeout(() => {
             this.addImageOnCanvas()
@@ -259,9 +359,42 @@ export default {
     display: block;
     padding: 0;
     box-shadow: 0 0 10px rgba(0, 0, 0, .3);
+    height: calc(100vh - 170px);
+    border-radius: 10px 10px 0 0;
 }
 
 #myCanvas {
     display: block;
     margin: auto;
-}</style>
+}
+
+.card-header,
+.card-footer {
+    background-color: rgba(33, 37, 41, 0.1);
+    font-weight: bold;
+    color: rgba(33, 37, 41, 0.75)
+}
+
+.card-footer {
+    font-weight: normal;
+}
+
+.card-footer i {
+    font-style: normal;
+    font-weight: bold;
+}
+
+.block-btn-group {
+    background-color: rgba(33, 37, 41, 0.1);
+    font-weight: bold;
+    color: rgba(33, 37, 41, 0.75);
+    padding: 0;
+    padding: 10px 15px;
+    border-radius: 10px 10px 0 0;
+}
+
+.card-body i {
+    display: block;
+    font-size: 10px;
+}
+</style>

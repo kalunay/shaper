@@ -30,32 +30,32 @@
             <div id="treeview7" class=""></div>
 
         </div>
-    </nav>  
+    </nav>
 </template>
 
 <script>
-    import ObjectsDataService from '@/services/ObjectsDataService';
-    //import SideBarApartments from '@/components/SideBarApartments.vue';
-    import ApartmentsDataService from '@/services/ApartmentsDataService';
-    import jquery from 'jquery';
-    import router from '../router/index'
+import ObjectsDataService from '@/services/ObjectsDataService';
+//import SideBarApartments from '@/components/SideBarApartments.vue';
+import ApartmentsDataService from '@/services/ApartmentsDataService';
+import jquery from 'jquery';
+import router from '../router/index'
 
-    window.$ = window.jQuery = require('jquery');
+window.$ = window.jQuery = require('jquery');
 
-    export default {
-        name: 'SideBar',
-        data() {
-            return {
-                objects: [],
-                defaultData: [],
-            }
-        },
-        components: {
-            //SideBarApartments,
-        },
-        methods: {
-            retrieveObjects () { 
-                ObjectsDataService.getAll()
+export default {
+    name: 'SideBar',
+    data() {
+        return {
+            objects: [],
+            defaultData: [],
+        }
+    },
+    components: {
+        //SideBarApartments,
+    },
+    methods: {
+        retrieveObjects() {
+            ObjectsDataService.getAll()
                 .then(response => {
                     this.objects = response.data
 
@@ -68,68 +68,68 @@
                         });
 
                         ApartmentsDataService.get(element.ProjectId)
-                        .then(response => {
-                            //console.log(response)
+                            .then(response => {
+                                //console.log(response)
 
-                            //let item = response.data.filter( item => item.text === element.name);
+                                //let item = response.data.filter( item => item.text === element.name);
 
-                            //строим секции
-                            const sections = [];
-                            for(let i = 0; i <= response.data.length - 1; i++){
-                                if(!sections.includes(response.data[i].SectionID) && response.data[i].ProjectId === element.ProjectId) {
-                                    sections.push(response.data[i].SectionID);                                      
-                                    let object = this.defaultData.filter(obj => obj.text === element.name)
-                                    //console.log(object[0].nodes)
+                                //строим секции
+                                const sections = [];
+                                for (let i = 0; i <= response.data.length - 1; i++) {
+                                    if (!sections.includes(response.data[i].SectionID) && response.data[i].ProjectId === element.ProjectId) {
+                                        sections.push(response.data[i].SectionID);
+                                        let object = this.defaultData.filter(obj => obj.text === element.name)
+                                        //console.log(object[0].nodes)
 
-                                    //строим этажи
-                                    const floors = [];
-                                    let floorsObjects = [];
-                                    for(let j = 0; j <= response.data.length - 1; j++){
-                                        if(!floors.includes(response.data[j].Storey) && response.data[j].ProjectId === element.ProjectId) {
-                                            floors.push(response.data[j].Storey);  
+                                        //строим этажи
+                                        const floors = [];
+                                        let floorsObjects = [];
+                                        for (let j = 0; j <= response.data.length - 1; j++) {
+                                            if (!floors.includes(response.data[j].Storey) && response.data[j].ProjectId === element.ProjectId) {
+                                                floors.push(response.data[j].Storey);
 
-                                            let floorObjects = []
-                                            const odjects = response.data.filter(odject => (response.data[i].SectionID === odject.SectionID && response.data[j].Storey === odject.Storey))
-                                            //this.tree[sections[i]][floors[j]] = odjects
-                                            odjects.forEach(elem => {
-                                                floorObjects.push({
-                                                    text: 'Квартира №' + elem.ObjectNumber,  
-                                                    tags: [elem.ProjectId],
-                                                    href: '/flat/' + elem.ProjectId + '/' + + elem.ObjectNumber,
-                                                })                                                          
-                                            });                                                  
+                                                let floorObjects = []
+                                                const odjects = response.data.filter(odject => (response.data[i].SectionID === odject.SectionID && response.data[j].Storey === odject.Storey))
+                                                //this.tree[sections[i]][floors[j]] = odjects
+                                                odjects.forEach(elem => {
+                                                    floorObjects.push({
+                                                        text: 'Квартира №' + elem.ObjectNumber,
+                                                        tags: [elem.ProjectId],
+                                                        href: '/flat/' + elem.ProjectId + '/' + + elem.ObjectNumber,
+                                                    })
+                                                });
 
-                                            let floorObjectsSorted = floorObjects.sort((a,b) => { return a['ObjectNumber'] > b['ObjectNumber'] ? 1 : -1 })
-                                            //console.log(floorObjectsSorted)
+                                                let floorObjectsSorted = floorObjects.sort((a, b) => { return a['ObjectNumber'] > b['ObjectNumber'] ? 1 : -1 })
+                                                //console.log(floorObjectsSorted)
 
-                                            if(floorObjects.length > 0){
-                                                floorsObjects.push({
-                                                    text: 'Этаж №' + response.data[j].Storey,
-                                                    tags: [],
-                                                    nodes: floorObjectsSorted                                                
-                                                })
+                                                if (floorObjects.length > 0) {
+                                                    floorsObjects.push({
+                                                        text: 'Этаж №' + response.data[j].Storey,
+                                                        tags: [],
+                                                        nodes: floorObjectsSorted
+                                                    })
+                                                }
+
+                                                floorObjects = []
                                             }
-
-                                            floorObjects = []
                                         }
-                                    }
 
-                                    if(floorsObjects.length > 0){
-                                        object[0].nodes.push({
-                                            text: 'Секция №' + response.data[i].SectionID,
-                                            tags: [],
-                                            nodes: floorsObjects
-                                        })
-                                    }
+                                        if (floorsObjects.length > 0) {
+                                            object[0].nodes.push({
+                                                text: 'Секция №' + response.data[i].SectionID,
+                                                tags: [],
+                                                nodes: floorsObjects
+                                            })
+                                        }
 
-                                    floorsObjects = []
+                                        floorsObjects = []
+                                    }
                                 }
-                            }
-                            //console.log(this.defaultData);
+                                //console.log(this.defaultData);
 
-                        }).catch((e) => {
-                            console.log(e)
-                        });
+                            }).catch((e) => {
+                                console.log(e)
+                            });
 
                     });
 
@@ -137,80 +137,87 @@
                 .catch(e => {
                     console.log(e)
                 })
-            },
         },
-        beforeMount(){
-            let rs = document.createElement('script')
-            rs.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js')
-            document.head.appendChild(rs)     
-        },
-        mounted() {
-            this.retrieveObjects();
+    },
+    beforeMount() {
+        let rs = document.createElement('script')
+        rs.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js')
+        document.head.appendChild(rs)
+    },
+    mounted() {
+        this.retrieveObjects();
 
-            const MENU_TREE = this.defaultData
-            setTimeout(function(){
-                jquery('#treeview7').treeview({
-                    color: "#428bca",
-                    showBorder: false,
-                    data: MENU_TREE,
-                    levels: 1,
-                    backColor: 'transparent',
-                    enableLinks: true,
-                    onNodeSelected: function(event, data) {
-                        router.push({ path: '/object/' + data.tags[0] })
-                    }
-                });
-            },1500);       
+        const MENU_TREE = this.defaultData
+        setTimeout(function () {
+            jquery('#treeview7').treeview({
+                color: "#428bca",
+                showBorder: false,
+                data: MENU_TREE,
+                levels: 1,
+                backColor: 'transparent',
+                enableLinks: true,
+                onNodeSelected: function (event, data) {
+                    router.push({ path: '/object/' + data.tags[0] })
+                }
+            });
+        }, 1500);
 
-        },
-    }
+    },
+}
 </script>
 
 <style>
-    .sidebar-link, a.sidebar-link { 
-        padding: .625rem;
-    }
-    .sidebar-link svg:last-child {
-        float: right;
-    }
+.sidebar-link,
+a.sidebar-link {
+    padding: .625rem;
+}
 
-    #treeview7 {
-        background: transparent;
-        width: 100%;
-        padding: 10px;
-        color: #e9ecef;
-    }
+.sidebar-link svg:last-child {
+    float: right;
+}
 
-    .node-treeview7 {
-        color: #e9ecef !important;
-    }
+#treeview7 {
+    background: transparent;
+    width: 100%;
+    padding: 10px;
+    color: #e9ecef;
+}
 
-    #treeview7 ul {
-        background: transparent;
-    }
+.node-treeview7 {
+    color: #e9ecef !important;
+}
 
-    .treeview span.indent {
-        margin-left: 5px;
-        margin-right: 5px;
-    }
+#treeview7 ul {
+    background: transparent;
+}
 
-    .sidebar {
-        width: auto;
-        padding: 5px;
-        max-width: 100% !important;
-        min-width: 100% !important;
-    }
+.treeview span.indent {
+    margin-left: 5px;
+    margin-right: 5px;
+}
 
-    .list-group-item {
-        background-color: transparent !important;
-        border: none !important;
-    }
+.sidebar {
+    width: auto;
+    padding: 5px;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
 
-    .list-group-item:hover {
-        background-color: transparent !important;
-        color: rgba(233,236,239,.5) !important;
-    }
-    .list-group-item.node-selected {
-        color: #518be1 !important;
-    }
-</style>
+.list-group-item {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.list-group-item:hover {
+    background-color: transparent !important;
+    color: rgba(233, 236, 239, .5) !important;
+}
+
+.list-group-item.node-selected {
+    color: #518be1 !important;
+}
+
+nav#sidebar {
+    height: 100vh;
+    overflow: scroll;
+}</style>
