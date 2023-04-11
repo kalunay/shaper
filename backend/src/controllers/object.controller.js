@@ -1,4 +1,4 @@
-const { Object } = require('../models');
+const { Object, Shapes } = require('../models');
 
 module.exports = {
     async getInfo({ params: id }, res){
@@ -27,5 +27,18 @@ module.exports = {
         req.files.file.mv('../frontend/shaper/public/images/' + req.files.file.name);
         console.log(req.files.file)
         return res.status(200).send(req.files.file)
-    }
+    },
+    async createShape({ body }, res){
+        //console.log(body.dataHouse.projectId)
+
+        const dataShape = body.dataShape
+        const dataHouse = body.dataHouse
+        
+        const shape = new Shapes(dataShape)
+        const newShape = await shape.save()
+
+        const object = await Object.findOneAndUpdate({ProjectId: body.dataHouse.projectId}, dataHouse, {new: true})
+
+        return res.status(200).send('OK')
+    },
 }

@@ -1,11 +1,6 @@
 const { model, Schema } = require('mongoose')
 
 const schema= new Schema({
-    ProjectId: {
-        type: Number,
-        default: 0,
-        unique: true
-    },
     image: {
         type: String
     },
@@ -17,11 +12,15 @@ const schema= new Schema({
         type: Number,
         default: 0
     },
-    sections: {
-        type: Array
+    coordinates: {
+        type: Array,
+        default: []
     },
     shapeId: Number,
-    houses: Array
+    itemsIds: {
+        type: Array,
+        default: []
+    }
 })
 
-module.exports = model('Object', schema)
+module.exports = model('Shapes', schema)

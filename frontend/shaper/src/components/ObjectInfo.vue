@@ -20,7 +20,7 @@
             </div>
 
             <div class="row b-main-content">
-                <div class="col-10 b-scroll">
+                <div class="col-10">
 
                     <div class="block-btn-group">
                         <div class="btn-group" role="group" aria-label="Basic example">
@@ -44,9 +44,11 @@
                         </div>
                     </div>
 
-                    <canvas id="myCanvas">
-                        Your browser does not support the HTML5 canvas tag.
-                    </canvas>
+                    <div class="b-scroll">
+                        <canvas id="myCanvas">
+                            Your browser does not support the HTML5 canvas tag.
+                        </canvas>                        
+                    </div>
                 </div>
                 <div class="col-2">
 
@@ -56,7 +58,7 @@
                             fill="none"
                             stroke="red"
                              :d='this.getPathSvg()' />
-                    </svg> -->
+                    </svg> -->                    
 
                     <div class="card text-center">
                         <div class="card-header">
@@ -64,24 +66,17 @@
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label>Координаты</label>
-                                <textarea class="form-control" :value="this.getPathSvg()" disabled rows="3"></textarea>
+                                <label>Координаты</label><br>
+                                <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
+                                {{ shapes.coordinates }}
                             </div>
                             <div class="mb-3">
-                                <label>Заголовок</label>
-                                <input class="form-control" v-model="house.header" type="text" required>
+                                <label>№ дома <i>([1,2,3])</i></label>
+                                <input class="form-control" type="text" v-model="house.houses" required>
                             </div>
                             <div class="mb-3">
-                                <label>№ дома</label>
-                                <input class="form-control" type="number" v-model="house.numHouse" required>
-                            </div>
-                            <div class="mb-3">
-                                <label>Номера секций <i>(через запятую)</i></label>
-                                <input class="form-control" type="text" v-model="house.sections" required>
-                            </div>
-                            <div class="mb-3">
-                                <label>Описание</label>
-                                <textarea class="form-control" v-model="house.description" rows="2"></textarea>
+                                <label>Номера секций <i>([[89101,89102,89103], [89201,89202,89203], [89301,89302,89303]])</i></label>
+                                <textarea class="form-control" v-model="house.sections" rows="3"></textarea>
                             </div>
                             <input type="hidden" v-model="house.projectId">
                             <button type="button" class="btn btn-success w-100" @click="saveObject()">Сохранить</button>
@@ -132,18 +127,19 @@ export default {
                 height: 0
             },
             scale: 1,
-            listScale: [1, 1.25, 1.5, 1.75, 2],
+            listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
             colorBrush: '#000',
             defaultObject: false,
             coordinits: [],
             svgPath: '',
             house: {
-                header: '',
-                description: '',
                 projectId: 0,
-                numHouse: 0,
-                sections: '',
-                shapeId: ''
+                houses: '1,2,3',
+                sections: '[89101,89102,89103], [89201,89202,89203], [89301,89302,89303]',
+                shapeId: '',
+                image: '',
+                width: 0,
+                height: 0,                
             },
             shapes: {
                 shapeId: '',
@@ -151,6 +147,7 @@ export default {
                 width: 0,
                 height: 0,
                 coordinates: [],
+                itemsIds: []
             }
         }
     },
@@ -237,15 +234,44 @@ export default {
 
         },
         saveObject(){
+
+            let timeDate = Date.parse(new Date());
+
+            //console.log(this.house.sections.split(', '))
+
             let dataHouse = {
-                header: this.house.header,
-                description: this.house.description,
                 projectId: this.house.projectId,
-                numHouse: this.house.numHouse,
-                sections: this.house.sections
+                houses: this.house.houses.split(','),
+                sections: this.house.sections.split(', '),
+                shapeId: timeDate,
+                image: this.fields.image,
+                width: this.fields.width,
+                height: this.fields.height,               
             }
 
-            console.log(dataHouse)
+            let dataShape = {
+                shapeId: timeDate,
+                image: this.fields.image,
+                width: this.fields.width,
+                height: this.fields.height, 
+                coordinates: this.shapes.coordinates,
+                itemsIds: []                
+            }
+
+            let data = {
+                dataHouse,
+                dataShape
+            }
+
+            //console.log(dataShape)
+
+            ObjectDataService.createShape(data)
+                .then(response => {
+                    console.log(response)
+                })
+                .catch(e => {
+                    console.log('error create: ', e)
+                })
 
         },
         infoObject() {
@@ -267,6 +293,9 @@ export default {
             canvas.height = this.fields.height
             let ctx = canvas.getContext('2d');
 
+            let coordinates = this.shapes.coordinates
+            //this.shapes.coordinates = coordinates
+
             // Create our image
             let newImage = new Image();
             newImage.src = '/images/' + this.fields.image
@@ -284,15 +313,27 @@ export default {
             ctx.strokeStyle = this.colorBrush
             //ctx.scale(this.scale, this.scale)
             let sc = this.scale
-            let coordinits = this.coordinits
+            let coord = []
             let ds = Math.ceil(this.fields.width / this.fields.height)
             canvas.onmouseup = function (event) {
                 let x = event.offsetX
                 let y = event.offsetY
                 ctx.lineTo(x, y); //рисуем линию
-                coordinits.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
+                coord.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
                 //coordinits.push(Math.ceil(y/sc)/ds)
                 ctx.stroke()
+               // this.getPathSvg()
+            }
+
+            canvas.ondblclick = (event) => {
+                console.log(event)
+                coord.pop()
+                coordinates.push(coord)
+                coord = []
+               // this.getPathSvg()
+                ctx.closePath()
+                ctx.beginPath()
+                console.log(coordinates)
             }
 
         },
@@ -301,7 +342,7 @@ export default {
             let ctx = canvas.getContext('2d')
             ctx.clearRect(0, 0, this.fields.width, this.fields.height)
             this.addImageOnCanvas()
-            this.coordinits = []
+            //this.coordinits = []
             this.house = {
                 header: '',
                 description: '',
@@ -317,7 +358,9 @@ export default {
             this.addImageOnCanvas()
         },
         getPathSvg() {
-            return 'M ' + this.coordinits.join(" ") + ' Z'
+            //return 'M ' + this.coordinits.join(" ") + ' Z'
+            //return this.shapes.coordinates = this.coordinits
+            console.log('111111')
         },
         getSizeForSvg() {
             let ds = Math.ceil(this.fields.width / this.fields.height)
@@ -356,11 +399,12 @@ export default {
 
 .b-scroll {
     overflow: scroll;
-    display: block;
+    display: flex;
+    flex-direction: column;
     padding: 0;
     box-shadow: 0 0 10px rgba(0, 0, 0, .3);
-    height: calc(100vh - 170px);
-    border-radius: 10px 10px 0 0;
+    height: calc(100vh - 210px);
+    border-radius: 0 0 10px 10px;
 }
 
 #myCanvas {
