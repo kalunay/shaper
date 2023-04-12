@@ -1,7 +1,7 @@
-import Breadcrumbs from '@/components/UI/Breadcrumbs.vue' 
+import BreadCrumbs from '@/components/UI/BreadCrumbs.vue' 
 
 export default {
     components: [
-        Breadcrumbs
+        BreadCrumbs
     ]
 }

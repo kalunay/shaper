@@ -1,6 +1,6 @@
 <template>
     <div v-for="obj in object" :key="obj.ProjectId" class="b-page-object">
-        <bread-crumbs :header="obj.name"></bread-crumbs>
+        <BreadCrumbs :header="obj.name"></BreadCrumbs>
 
         <h1>{{ obj.name }}</h1>
 
@@ -41,6 +41,15 @@
                             <div class="btn-group" role="group">
                                 <input type="color" v-model="colorBrush" />
                             </div>
+                        </div>
+                        <div class="btn-group" role="group" v-if="house.houses.length > 0">
+                            <router-link 
+                                class="btn" 
+                                :class="btnColors[index]"
+                                v-for="index in house.houses" 
+                                :key="index"                                
+                                :to="`/object/${this.fields.ProjectId}/house/${index}`"
+                            >Дом #{{ index }}</router-link>
                         </div>
                     </div>
 
@@ -122,9 +131,13 @@ export default {
             object: null,
             fields: {
                 ProjectId: 0,
+                houses: [],
+                sections: [],
+                shapeId: 0,
                 image: '',
                 width: 0,
-                height: 0
+                height: 0,  
+
             },
             scale: 1,
             listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
@@ -148,7 +161,8 @@ export default {
                 height: 0,
                 coordinates: [],
                 itemsIds: []
-            }
+            },
+            btnColors: ['btn-primary', 'btn-secondary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-dark']
         }
     },
     methods: {
@@ -277,11 +291,19 @@ export default {
         infoObject() {
             ObjectDataService.info(this.fields.ProjectId)
                 .then(response => {
-                    console.log('image: ', response.data[0].image)
-                    this.fields.image = response.data[0].image
-                    this.fields.width = response.data[0].width
-                    this.fields.height = response.data[0].height
+                    console.log('image: ', response.data['item'][0].image)
+                    this.fields.image = response.data['item'][0].image
+                    this.fields.width = response.data['item'][0].width
+                    this.fields.height = response.data['item'][0].height
+                    this.fields.houses = response.data['item'][0].houses
+                    this.fields.sections = response.data['item'][0].sections
+                    this.fields.shapeId = response.data['item'][0].shapeId                    
                     this.defaultObject = true
+
+                    this.house.houses = response.data['item'][0].houses
+                    this.house.sections = response.data['item'][0].sections
+
+                    this.shapes.coordinates = response.data['shape'][0].coordinates
                 })
                 .catch(e => {
                     console.log('error info: ', e)
@@ -440,5 +462,10 @@ export default {
 .card-body i {
     display: block;
     font-size: 10px;
+}
+.block-btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 </style>

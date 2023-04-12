@@ -2,7 +2,8 @@ const { model, Schema } = require('mongoose')
 
 const schema= new Schema({
     image: {
-        type: String
+        type: String,
+        unique: true
     },
     width: {
         type: Number,
