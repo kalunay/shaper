@@ -1,6 +1,6 @@
 <template>
     <div v-for="obj in object" :key="obj.ProjectId" class="b-page-object">
-        <BreadCrumbs :header="obj.name"></BreadCrumbs>
+        <BreadCrumbs :links="links"></BreadCrumbs>
 
         <h1>{{ obj.name }}</h1>
 
@@ -139,6 +139,7 @@ export default {
                 height: 0,  
 
             },
+            links: [],  
             scale: 1,
             listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
             colorBrush: '#000',
@@ -170,6 +171,9 @@ export default {
             ObjectsDataService.get(id)
                 .then(response => {
                     this.object = response.data
+                    this.links = [
+                        {'header': response.data[0].name, 'path': `/object/${this.$route.params.id}`},
+                    ]  
                     //console.log(this.object)
                 })
                 .catch(e => {
@@ -303,7 +307,7 @@ export default {
                     this.house.houses = response.data['item'][0].houses
                     this.house.sections = response.data['item'][0].sections
 
-                    this.shapes.coordinates = response.data['shape'][0].coordinates
+                    this.shapes.coordinates = response.data['shape'][0].coordinates                   
                 })
                 .catch(e => {
                     console.log('error info: ', e)
