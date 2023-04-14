@@ -1,6 +1,6 @@
 const { model, Schema } = require('mongoose')
 
-const schema= new Schema({
+const schema = new Schema({
     image: {
         type: String,
         unique: true
