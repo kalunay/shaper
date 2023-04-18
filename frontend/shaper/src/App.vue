@@ -2,10 +2,8 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-lg-2 col-md-3">
+      <div class="col-lg-12 d-flex">
         <side-bar />
-      </div>
-      <div class="col-lg-10 col-md-9">
         <router-view/>
       </div>
     </div>
@@ -49,4 +47,10 @@ nav a.router-link-exact-active {
   width: 100%;
   max-width: 100% !important;
 }
+
+.row > * {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 </style>

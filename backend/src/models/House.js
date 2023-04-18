@@ -26,7 +26,8 @@ const schema = new Schema({
     height: {
         type: Number,
         default: 0
-    }
+    },
+    floors: Array
 })
 
 module.exports = model('House', schema)

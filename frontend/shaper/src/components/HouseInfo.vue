@@ -14,8 +14,8 @@
                 </div>
             </div>
 
-            <div class="row b-main-content">
-                <div class="col-10">
+            <div class="row b-main-content" id="main-content">
+                <div class="" id="canvas">
 
                     <div class="block-btn-group">
                         <div class="btn-group" role="group" aria-label="Basic example">
@@ -45,6 +45,31 @@
                         </canvas>                        
                     </div>
                 </div>
+
+                <div id="card">
+                    <div class="card text-center">
+                        <div class="card-header">
+                            Добавление Дома №{{ this.$route.params.house_id }}
+                            <span class="glyphicon glyphicon-menu-down" id="addForm"></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label>Координаты</label><br>
+                                <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
+                                {{ shapes.coordinates }}
+                            </div>
+                            <div class="mb-3">
+                                <label>Этажи <i>([-1,1,2,3])</i></label>
+                                <input class="form-control" v-model="this.fields.floors" type="text" required>
+                            </div>
+                            <input type="hidden">
+                            <button type="button" class="btn btn-success w-100" >Сохранить</button>
+                        </div>
+                        <div class="card-footer text-body-secondary">
+                            Объект: <i>{{ object.name }}</i>
+                        </div>
+                    </div>
+                </div>
                 
             </div>
 
@@ -56,6 +81,22 @@
     import ObjectsDataService from '@/services/ObjectsDataService'
     import HouseDataService from '@/services/HouseDataService'
     export default {
+        watch: {
+            '$route.params': {
+                handler(newValue) {
+                    this.getObject(newValue.id)
+                    this.fields.ProjectId = this.$route.params.id
+                    this.getHouse()
+                    this.addImageOnCanvas()
+                },
+                immediate: false,
+            },
+            colorBrush: {
+                handler(newValue) {
+                    this.addImageOnCanvas(newValue)
+                }
+            }
+        },
         name: 'HouseInfo',
         data(){
             return {
@@ -63,8 +104,7 @@
                 object: {},
                 fields: {
                     ProjectId: this.$route.params.id,
-                    houses: [],
-                    sections: [],
+                    floors: [],
                     shapeId: 0,
                     image: '',
                     width: 0,
@@ -80,6 +120,9 @@
                     itemsIds: []
                 },
                 defaultHouse: false,
+                scale: 1,
+                listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
+                colorBrush: '#000',
             }
         },
         methods: {
@@ -97,6 +140,12 @@
                 HouseDataService.info(this.$route.params.id, this.$route.params.house_id)
                     .then(response => {
                         console.log(response)
+                        this.fields.image = response.data[0].image
+                        this.fields.width = response.data[0].width
+                        this.fields.height = response.data[0].height
+                        this.fields.sections = response.data[0].sections
+                        this.fields.shapeId = response.data[0].shapeId                    
+                        this.defaultObject = true                        
                     })
                     .catch(e => {
                         console.log('error info: ', e)
@@ -168,7 +217,7 @@
                 let canvas = document.getElementById("myCanvas")
                 canvas.width = this.fields.width
                 canvas.height = this.fields.height
-                let ctx = canvas.getContext('2d');
+                let ctx = canvas.getContext('2d')
 
                 let coordinates = this.shapes.coordinates
                 //this.shapes.coordinates = coordinates
@@ -185,6 +234,8 @@
                     // Draw the image onto the context with cropping
                     ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
                 }
+
+                console.log(this.fields.image)
 
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = this.colorBrush
@@ -214,6 +265,37 @@
                 }
 
             },
+            clearCanvas() {
+                let canvas = document.getElementById("myCanvas")
+                let ctx = canvas.getContext('2d')
+                ctx.clearRect(0, 0, this.fields.width, this.fields.height)
+                this.addImageOnCanvas()
+                //this.coordinits = []
+                this.house = {
+                    header: '',
+                    description: '',
+                    projectId: 0,
+                    numHouse: 0,
+                    sections: ''
+                }
+            },
+            scaleCanvas(scale) {
+                this.scale = scale
+                this.fields.width *= scale
+                this.fields.height *= scale
+                this.addImageOnCanvas()
+                console.log(this.fields.width)
+                console.log(this.fields.height)
+            },
+            getPathSvg() {
+                //return 'M ' + this.coordinits.join(" ") + ' Z'
+                //return this.shapes.coordinates = this.coordinits
+                console.log('111111')
+            },
+            getSizeForSvg() {
+                let ds = Math.ceil(this.fields.width / this.fields.height)
+                return '0 0 ' + Math.ceil(this.fields.width / ds) + ' ' + Math.ceil(this.fields.height / ds)
+            }
         },
         beforeCreate(){
 
@@ -230,7 +312,14 @@
 
             setTimeout(() => {
                 this.addImageOnCanvas()
-            }, 1000);
+            }, 1000)
+
+            const card = document.getElementById('addForm')
+
+            card.addEventListener('click', function () {
+                var navMenu = document.getElementById("main-content");
+                navMenu.classList.toggle("hidden");
+            })
 
         }
     }
@@ -245,4 +334,100 @@
         width: 100%;
         padding: 20px;
     }
+    .b-page-object {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .b-scroll {
+        overflow: scroll;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .3);
+        height: calc(100vh - 210px);
+        border-radius: 0 0 10px 10px;
+    }
+
+    #myCanvas {
+        display: block;
+        margin: auto;
+    }
+
+    .card-header,
+    .card-footer {
+        background-color: rgba(33, 37, 41, 0.1);
+        font-weight: bold;
+        color: rgba(33, 37, 41, 0.75)
+    }
+
+    .card-footer {
+        font-weight: normal;
+    }
+
+    .card-footer i {
+        font-style: normal;
+        font-weight: bold;
+    }
+
+    .block-btn-group {
+        background-color: rgba(33, 37, 41, 0.1);
+        font-weight: bold;
+        color: rgba(33, 37, 41, 0.75);
+        padding: 0;
+        padding: 10px 15px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .card-body i {
+        display: block;
+        font-size: 10px;
+    }
+    .block-btn-group {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .card {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .b-main-content {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .glyphicon {
+        font-family: "Glyphicons Halflings";
+    }
+    .glyphicon-menu-down::before {
+        content: "\2212";
+        font-family: "Glyphicons Halflings";
+    }
+
+    .hidden #card .card-body { display: none; }
+
+    .hidden #card .glyphicon-menu-down::before { content: "\002b"; }
+
+    #canvas { width: calc(100% - 260px); }
+    #card { width: 260px; }
+    .hidden #canvas { 
+        width: 100%; 
+        transition: 1s;
+        animation: show 3s 1;
+        animation-fill-mode: forwards;
+        animation-delay: 1s;  
+    }
+    .hidden #card { 
+        width: 260px;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        transition: 1s;
+        animation: show 3s 1;
+        animation-fill-mode: forwards;
+        animation-delay: 1s;  
+     }    
 </style>

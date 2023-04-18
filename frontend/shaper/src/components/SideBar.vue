@@ -1,6 +1,10 @@
 <template>
     <nav id="sidebar" class="sidebar js-sidebar">
+
+        <div class="glyphicon glyphicon-chevron-left" id="hiddenMenu"></div>
+
         <div class="sidebar-content js-simplebar">
+
             <a class="sidebar-brand" href="/">
                 <span class="align-middle">Objects</span>
             </a>
@@ -162,6 +166,13 @@ export default {
             });
         }, 1500);
 
+        const button = document.getElementById('hiddenMenu')
+
+        button.addEventListener('click', function () {
+            var navMenu = document.getElementById("sidebar");
+            navMenu.classList.toggle("hide");
+        })
+
     },
 }
 </script>
@@ -198,9 +209,7 @@ a.sidebar-link {
 
 .sidebar {
     width: auto;
-    padding: 5px;
-    max-width: 100% !important;
-    min-width: 100% !important;
+    padding: 0;
 }
 
 .list-group-item {
@@ -218,6 +227,54 @@ a.sidebar-link {
 }
 
 nav#sidebar {
-    height: 100vh;
-    overflow: scroll;
-}</style>
+    /*height: 100vh;
+    overflow-y: scroll;*/
+    z-index: 999999;
+    position: relative;
+    left: 0;
+}
+
+nav#sidebar.hide {
+    position: absolute !important;
+    left: -260px;
+    transition: 1s;
+    animation: show 3s 1;
+    animation-fill-mode: forwards;
+    animation-delay: 1s;
+}
+
+#sidebar #hiddenMenu::before { content: "\e079"; }
+#sidebar #hiddenMenu {
+    font-family: "Glyphicons Halflings";
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    background: #222e3c;
+    top: 0;
+    left: 260px;
+    color: #fff;
+    text-align: center;
+    line-height: 32px;
+    border-radius: 0 10px 10px 0;
+}
+#sidebar.hide #hiddenMenu::before { content: "\e080"; }
+#sidebar.hide #hiddenMenu {
+    position: fixed;
+    left: 0;
+    background: #222e3c;
+    top: 0;
+    transition: 1s;
+    animation: show 3s 1;
+    animation-fill-mode: forwards;
+    animation-delay: 1s;    
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  background: #222e3c;
+  overflow-y: scroll;
+  height: 100vh;
+}
+
+</style>

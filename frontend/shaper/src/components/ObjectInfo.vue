@@ -382,6 +382,8 @@ export default {
             this.fields.width *= scale
             this.fields.height *= scale
             this.addImageOnCanvas()
+            console.log(this.fields.width)
+            console.log(this.fields.height)
         },
         getPathSvg() {
             //return 'M ' + this.coordinits.join(" ") + ' Z'
@@ -436,6 +438,10 @@ export default {
 #myCanvas {
     display: block;
     margin: auto;
+}
+
+.card {
+    margin-left: 10px;
 }
 
 .card-header,
