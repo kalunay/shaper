@@ -1,4 +1,4 @@
-const { House } = require('../models')
+const { House, Shapes } = require('../models')
 
 module.exports = {
     async upload(req, res){
@@ -13,12 +13,33 @@ module.exports = {
         return res.status(200).send(newItem)
     },
     async update({ params: {ProjectId, house_id}, body }, res){
-        const item = await House.findOneAndUpdate({ProjectId: ProjectId, numHouse: house_id}, body, {new: true})
-        return res.status(200).send(item)
+
+console.log(ProjectId, house_id, body)
+
+        //const item = await House.findOneAndUpdate({ProjectId: ProjectId, numHouse: house_id}, body, {new: true})
+        //const shape = await Shapes.find({shapeId: item[0].shapeId})
+        //return res.status(200).send(item)
     },
     async getHouse(req, res){
         console.log(req.params.id)
         const item = await House.find({ProjectId: req.params.id, numHouse: req.params.house_id})
+        const shape = await Shapes.find({shapeId: item[0].shapeId})
+        const newItem = {item,shape }
+        return res.status(200).send(newItem)
+
         return res.status(200).send(item)
+    },
+    async createshape({ body }, res){
+        //console.log(body.dataHouse.projectId)
+
+        const dataShape = body.dataShape
+        const dataHouse = body.dataHouse
+        
+        const shape = new Shapes(dataShape)
+        const newShape = await shape.save()
+
+        const object = await House.findOneAndUpdate({ProjectId: body.dataHouse.projectId, numHouse: body.dataHouse.numHouse}, dataHouse, {new: true})
+
+        return res.status(200).send('OK')
     }
 }

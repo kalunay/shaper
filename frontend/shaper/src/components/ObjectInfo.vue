@@ -370,8 +370,6 @@ export default {
             this.addImageOnCanvas()
             //this.coordinits = []
             this.house = {
-                header: '',
-                description: '',
                 projectId: 0,
                 numHouse: 0,
                 sections: ''

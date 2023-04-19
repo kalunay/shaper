@@ -5,7 +5,7 @@ class HouseDataService {
         return http.post('/house', data)
     }
     update(data){
-        return http.post(`/house/update/${data.ProjectId}/${data.numHouse}`, data)
+        return http.post(`/house/update/${data.dataHouse.ProjectId}/${data.dataHouse.numHouse}`, data)
     }
     upload(data){
         return http.post('/house/upload/image', 
@@ -21,7 +21,8 @@ class HouseDataService {
         return http.get(`/house/${ProjectId}/${house_id}`)
     }
     createShape(data){
-        return http.post(`/house/createShape/`, data)
+        console.log(data)
+        return http.post(`/house/createshape/`, data)
     }
 }
 

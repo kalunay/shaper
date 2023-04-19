@@ -3,6 +3,19 @@
         <BreadCrumbs :links="links"></BreadCrumbs>
        <h1>Дом №{{ this.$route.params.house_id }}, <i>{{ object.name }}</i></h1>
 
+        <div class="b-pop-coordinates" v-if="subcoordinates.length > 0">
+            {{ subcoordinates }}
+            <div class="editPopUp">
+                <div>
+                    <input type="number" class="form-control form-contro-xs" size="2" v-model="floorEdit">
+                    <button class="btn btn-primary" @click="editToCoordinates()">Edit</button>
+                </div>
+                <div>
+                    <button class="btn btn-info" @click="addToCoordinates()">Add</button>
+                </div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="row">
                 <div class="col">
@@ -37,6 +50,14 @@
                                 <input type="color" v-model="colorBrush" />
                             </div>
                         </div>
+                        <div class="btn-group" role="group" v-if="fields.floors.length > 0">
+                            <router-link 
+                                class="btn btn-light" 
+                                v-for="index in fields.floors" 
+                                :key="index"                                
+                                :to="`/object/${this.fields.ProjectId}/house/${this.$route.params.house_id}/floors/${index}`"
+                            >Этаж #{{ index }}</router-link>
+                        </div>
                     </div>
 
                     <div class="b-scroll">
@@ -54,16 +75,20 @@
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label>Координаты</label><br>
-                                <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
-                                {{ shapes.coordinates }}
+                                <label>Номера секций <i>([89101,89102,89103])</i></label>
+                                <input class="form-control" v-model="this.fields.sections" type="text" required>
                             </div>
                             <div class="mb-3">
                                 <label>Этажи <i>([-1,1,2,3])</i></label>
                                 <input class="form-control" v-model="this.fields.floors" type="text" required>
                             </div>
-                            <input type="hidden">
-                            <button type="button" class="btn btn-success w-100" >Сохранить</button>
+                            <div class="mb-3">
+                                <label>Координаты</label><br>
+                                <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
+                                {{ shapes.coordinates }}
+                            </div>                            
+                            <button type="button" class="btn btn-dark w-50" @click="saveObject()">Сохранить</button>
+                            <button type="button" class="btn btn-warning w-50" @click="clearObject()">Очистить</button>
                         </div>
                         <div class="card-footer text-body-secondary">
                             Объект: <i>{{ object.name }}</i>
@@ -105,6 +130,7 @@
                 fields: {
                     ProjectId: this.$route.params.id,
                     floors: [],
+                    sections: [],
                     shapeId: 0,
                     image: '',
                     width: 0,
@@ -119,10 +145,12 @@
                     coordinates: [],
                     itemsIds: []
                 },
+                subcoordinates: [],
                 defaultHouse: false,
                 scale: 1,
                 listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
                 colorBrush: '#000',
+                floorEdit: 0
             }
         },
         methods: {
@@ -139,12 +167,14 @@
             getHouse() {
                 HouseDataService.info(this.$route.params.id, this.$route.params.house_id)
                     .then(response => {
-                        console.log(response)
-                        this.fields.image = response.data[0].image
-                        this.fields.width = response.data[0].width
-                        this.fields.height = response.data[0].height
-                        this.fields.sections = response.data[0].sections
-                        this.fields.shapeId = response.data[0].shapeId                    
+                        console.log('getHouse', response)
+                        this.fields.image = response.data['item'][0].image
+                        this.fields.width = response.data['item'][0].width
+                        this.fields.height = response.data['item'][0].height
+                        this.fields.sections = response.data['item'][0].sections
+                        this.fields.floors = response.data['item'][0].floors
+                        this.fields.shapeId = response.data['item'][0].shapeId   
+                        this.shapes.coordinates = response.data['shape'][0].coordinates                    
                         this.defaultObject = true                        
                     })
                     .catch(e => {
@@ -213,13 +243,65 @@
                         })
                 }
             },
+            saveObject(){
+
+                let timeDate = Date.parse(new Date());
+
+                //console.log(this.house.sections.split(', '))
+                console.log(this.defaultObject)
+
+                let dataHouse = {
+                    ProjectId: this.fields.ProjectId,
+                    numHouse: this.$route.params.house_id,
+                    floors: this.fields.floors,
+                    sections: this.fields.sections,
+                    shapeId: timeDate,
+                    image: this.fields.image,
+                    width: this.fields.width,
+                    height: this.fields.height,               
+                }
+
+                let dataShape = {
+                    shapeId: timeDate,
+                    image: this.fields.image,
+                    width: this.fields.width,
+                    height: this.fields.height, 
+                    coordinates: this.shapes.coordinates,
+                    itemsIds: []                
+                }
+
+                let data = {
+                    dataHouse,
+                    dataShape
+                }
+
+                //console.log(dataShape)
+                if (!this.defaultObject) {
+                    HouseDataService.createShape(data)
+                        .then(response => {
+                            console.log(response)
+                        })
+                        .catch(e => {
+                            console.log('error create: ', e)
+                        })
+                } else {
+                    HouseDataService.update(data)
+                        .then(response => {
+                            console.log(response)
+                        })
+                        .catch(e => {
+                            console.log('error update: ', e)
+                        })
+                }    
+
+            },
             addImageOnCanvas() {
                 let canvas = document.getElementById("myCanvas")
                 canvas.width = this.fields.width
                 canvas.height = this.fields.height
                 let ctx = canvas.getContext('2d')
 
-                let coordinates = this.shapes.coordinates
+                //let coordinates = this.shapes.coordinates
                 //this.shapes.coordinates = coordinates
 
                 // Create our image
@@ -256,12 +338,13 @@
                 canvas.ondblclick = (event) => {
                     console.log(event)
                     coord.pop()
-                    coordinates.push(coord)
+                    //coordinates.push(coord)
+                    this.subcoordinates = coord
                     coord = []
                 // this.getPathSvg()
                     ctx.closePath()
                     ctx.beginPath()
-                    console.log(coordinates)
+                    //console.log(coordinates)
                 }
 
             },
@@ -270,14 +353,16 @@
                 let ctx = canvas.getContext('2d')
                 ctx.clearRect(0, 0, this.fields.width, this.fields.height)
                 this.addImageOnCanvas()
-                //this.coordinits = []
+                this.scaleCanvas(this.scale)
+                this.subcoordinates = []
                 this.house = {
-                    header: '',
-                    description: '',
-                    projectId: 0,
-                    numHouse: 0,
-                    sections: ''
+                    sections: '',
+                    floors: '',
                 }
+                //this.shapes = {
+                //    coordinates: []
+                //}
+
             },
             scaleCanvas(scale) {
                 this.scale = scale
@@ -295,6 +380,20 @@
             getSizeForSvg() {
                 let ds = Math.ceil(this.fields.width / this.fields.height)
                 return '0 0 ' + Math.ceil(this.fields.width / ds) + ' ' + Math.ceil(this.fields.height / ds)
+            },
+            addToCoordinates(){
+                this.shapes.coordinates.push(this.subcoordinates)
+                this.subcoordinates = []
+            },
+            editToCoordinates(){
+                console.log(this.floorEdit)
+                console.log(this.subcoordinates)
+                this.shapes.coordinates[this.floorEdit] = this.subcoordinates
+            },
+            clearObject(){
+                this.shapes.coordinates = []
+                this.fields.sections = []
+                this.fields.floors = []
             }
         },
         beforeCreate(){
@@ -430,4 +529,37 @@
         animation-fill-mode: forwards;
         animation-delay: 1s;  
      }    
+
+    .b-pop-coordinates {
+        position: fixed;
+        background: #fff;
+        width: 300px;
+        padding: 10px;
+        z-index: 9999;
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba(0,0,0, .4);
+        top: 10px;
+        right: 280px;
+    } 
+
+    .form-contro-xs {
+        width: 75px;
+    }
+
+    .editPopUp {
+        display: flex;
+        flex-direction: row;
+        margin: 10px auto;
+        justify-content: space-between;
+    }
+
+    .editPopUp > div {
+        display: flex;
+        width: 50%;
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+    .btn-group .btn-light {
+        margin-left: 10px !important;
+    }
 </style>

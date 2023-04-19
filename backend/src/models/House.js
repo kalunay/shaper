@@ -13,8 +13,7 @@ const schema = new Schema({
         unique: true
     },
     sections: {
-        type: String,
-        default: ''
+        type: Array
     },
     image: {
         type: String
