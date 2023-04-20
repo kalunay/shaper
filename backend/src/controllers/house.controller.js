@@ -12,13 +12,12 @@ module.exports = {
         const newItem = await item.save()
         return res.status(200).send(newItem)
     },
-    async update({ params: {ProjectId, house_id}, body }, res){
-
-console.log(ProjectId, house_id, body)
-
-        //const item = await House.findOneAndUpdate({ProjectId: ProjectId, numHouse: house_id}, body, {new: true})
-        //const shape = await Shapes.find({shapeId: item[0].shapeId})
-        //return res.status(200).send(item)
+    async update({ params: {id, house_id}, body }, res){
+        const dataShape = body.dataShape
+        const dataHouse = body.dataHouse
+        const item = await House.findOneAndUpdate({ProjectId: id, numHouse: house_id}, dataHouse, {new: true})
+        const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
+        return res.status(200).send('OK')
     },
     async getHouse(req, res){
         console.log(req.params.id)

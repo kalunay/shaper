@@ -245,7 +245,11 @@
             },
             saveObject(){
 
-                let timeDate = Date.parse(new Date());
+                let timeDate = this.fields.shapeId;
+
+                if (!this.defaultObject) {
+                    timeDate = Date.parse(new Date());
+                }
 
                 //console.log(this.house.sections.split(', '))
                 console.log(this.defaultObject)
