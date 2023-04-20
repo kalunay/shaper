@@ -1,3 +1,3 @@
 module.exports = {
-    router: ['apartments', 'objects', 'object', 'house'],
+    router: ['apartments', 'objects', 'object', 'house', 'floors'],
 }

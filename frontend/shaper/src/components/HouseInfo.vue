@@ -58,7 +58,7 @@
                                 class="btn btn-light" 
                                 v-for="index in fields.floors" 
                                 :key="index"                                
-                                :to="`/object/${this.fields.ProjectId}/house/${this.$route.params.house_id}/floors/${index}`"
+                                :to="`/object/${this.fields.ProjectId}/house/${this.$route.params.house_id}/floor/${index}`"
                             >Этаж #{{ index }}</router-link>
                         </div>
                     </div>
@@ -488,50 +488,6 @@
 </script>
 
 <style scoped>
-    h1 i {
-        font-style: normal;
-        font-size: 16px;
-    }
-    .b-page-object {
-        width: 100%;
-        padding: 20px;
-    }
-    .b-page-object {
-        width: 100%;
-        padding: 20px;
-    }
-
-    .b-scroll {
-        overflow: scroll;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-        box-shadow: 0 0 10px rgba(0, 0, 0, .3);
-        height: calc(100vh - 210px);
-        border-radius: 0 0 10px 10px;
-    }
-
-    #myCanvas {
-        display: block;
-        margin: auto;
-    }
-
-    .card-header,
-    .card-footer {
-        background-color: rgba(33, 37, 41, 0.1);
-        font-weight: bold;
-        color: rgba(33, 37, 41, 0.75)
-    }
-
-    .card-footer {
-        font-weight: normal;
-    }
-
-    .card-footer i {
-        font-style: normal;
-        font-weight: bold;
-    }
-
     .block-btn-group {
         background-color: rgba(33, 37, 41, 0.1);
         font-weight: bold;

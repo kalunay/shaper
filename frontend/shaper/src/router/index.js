@@ -18,6 +18,11 @@ const routes = [
     component: () => import('@/views/HouseInfoView'),
   },
   {
+    path: '/object/:id/house/:house_id/floor/:floor_id',
+    name: 'FloorInfoView',
+    component: () => import('@/views/FloorInfoView'),
+  },
+  {
     path: '/about',
     name: 'about',
     // route level code-splitting
