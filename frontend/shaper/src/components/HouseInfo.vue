@@ -8,10 +8,10 @@
             <div class="editPopUp">
                 <div>
                     <input type="number" class="form-control form-contro-xs" size="2" v-model="floorEdit">
-                    <button class="btn btn-primary" @click="editToCoordinates()">Edit</button>
+                    <button class="btn btn-primary" @click="editToCoordinates()">Сохранить</button>
                 </div>
                 <div>
-                    <button class="btn btn-info" @click="addToCoordinates()">Add</button>
+                    <button class="btn btn-info" @click="addToCoordinates()">Добавить</button>
                 </div>
             </div>
         </div>
@@ -49,6 +49,9 @@
                             <div class="btn-group" role="group">
                                 <input type="color" v-model="colorBrush" />
                             </div>
+                            <button type="button" class="btn btn-danger" @click="drawShapes()">
+                                <i class="glyphicon glyphicon-tint"></i> Отрисовать
+                            </button>
                         </div>
                         <div class="btn-group" role="group" v-if="fields.floors.length > 0">
                             <router-link 
@@ -85,10 +88,19 @@
                             <div class="mb-3">
                                 <label>Координаты</label><br>
                                 <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
-                                {{ shapes.coordinates }}
+                                <div class="b-coordinates">{{ shapes.coordinates }}</div>
                             </div>                            
                             <button type="button" class="btn btn-dark w-50" @click="saveObject()">Сохранить</button>
                             <button type="button" class="btn btn-warning w-50" @click="clearObject()">Очистить</button>
+
+                            <div class="mb-3 mt-3"><label>Удалить координаты по индексу</label></div>
+                            <div class="mb-3 d-flex">
+                                <select class="form-control" v-model="delIndex">
+                                    <option v-for="coord,index in shapes.coordinates" :key="index">{{ index }}</option>
+                                </select>
+                                <button type="button" class="btn btn-danger" @click="deleteIndex()">Удалить</button>                                
+                            </div>
+
                         </div>
                         <div class="card-footer text-body-secondary">
                             Объект: <i>{{ object.name }}</i>
@@ -150,7 +162,8 @@
                 scale: 1,
                 listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
                 colorBrush: '#000',
-                floorEdit: 0
+                floorEdit: 0,
+                delIndex: 0
             }
         },
         methods: {
@@ -398,6 +411,52 @@
                 this.shapes.coordinates = []
                 this.fields.sections = []
                 this.fields.floors = []
+            },
+            drawShapes(){
+                console.log(this.shapes.coordinates)
+                let canvas = document.getElementById("myCanvas")
+                let ctx = canvas.getContext('2d')
+
+                let newImage = new Image();
+                newImage.src = '/images/' + this.fields.image
+                newImage.width = this.fields.width
+                newImage.height = this.fields.height
+
+                // When it loads
+                newImage.onload = () => {
+                    ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
+
+                    ctx.lineWidth = 1
+                    ctx.strokeStyle = this.colorBrush
+
+                    this.shapes.coordinates.forEach(element => {
+                        //console.log(element)
+                        element.forEach(elem => {
+                            //console.log(elem)
+                            let coords = elem.split(',')
+                            ctx.lineTo(coords[0] * 2, coords[1] * 2)
+                            ctx.stroke()
+                        });
+                    });                    
+                }
+
+            },
+            deleteIndex(){
+                console.log(this.delIndex)
+                console.log(this.shapes.coordinates)
+                let value = this.delIndex
+                let arr = this.shapes.coordinates
+                arr = arr.filter(item => item !== value)
+                console.log(arr)
+
+                const array = this.shapes.coordinates;
+                const index = this.delIndex;
+                if (index > -1) { 
+                    array.splice(index, 1);
+                }
+
+                console.log(array); 
+
             }
         },
         beforeCreate(){
@@ -565,5 +624,9 @@
     }
     .btn-group .btn-light {
         margin-left: 10px !important;
+    }
+    .b-coordinates {
+        height: 200px;
+        overflow-y: scroll;
     }
 </style>
