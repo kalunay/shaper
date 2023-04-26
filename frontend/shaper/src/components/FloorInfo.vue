@@ -3,6 +3,7 @@
         <BreadCrumbs :links="links"></BreadCrumbs>
         <h1>Этаж №{{ this.$route.params.floor_id }}, <i>Дом №{{ this.$route.params.house_id }}</i>, <i>{{ object.name }}</i></h1>
 
+        {{ defaultObject }}
         <div class="b-pop-coordinates" v-if="subcoordinates.length > 0">
             {{ subcoordinates }}
             <div class="editPopUp">
@@ -260,12 +261,20 @@
                         this.fields.width = response.data['item'].width
                         this.fields.height = response.data['item'].height
                         this.fields.shapeId = response.data['item'].shapeId   
-                        this.shapes.coordinates = response.data['shape'].coordinates
-                        this.shapes.itemsIds = response.data['shape'].itemsIds
+
+                        if(response.data['shape']){
+                            this.shapes.coordinates = response.data['shape'].coordinates
+                            
+                            this.shapes.itemsIds = ((response.data['item'].itemsIds.length > 0) ? response.data['item'].itemsIds : response.data['shape'].itemsIds)
+
+                            this.shapes.shapeId = response.data['shape'].shapeId
+                        }
 
                         this.house = {...response.data['house']}
 
-                        this.defaultObject = true                        
+                        //console.log('length',Object.keys(response.data['item']).length)
+
+                        if(Object.keys(response.data['item']).length > 0) { this.defaultObject = true }
                     })
                     .catch(e => {
                         console.log('error info: ', e)
@@ -273,11 +282,14 @@
             },
             saveObject(){
 
-                let timeDate = this.fields.shapeId;
+                let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
 
-                if (!this.defaultObject) {
-                    timeDate = Date.parse(new Date());
-                }
+                console.log(this.fields.shapeId)
+                console.log(this.shapes.shapeId)
+
+                // if (!this.defaultObject) {
+                //     timeDate = Date.parse(new Date());
+                // }
 
                 //console.log(this.house.sections.split(', '))
                 console.log(this.defaultObject)
@@ -300,7 +312,7 @@
                     width: this.fields.width,
                     height: this.fields.height, 
                     coordinates: this.shapes.coordinates,
-                    itemsIds: this.shapes.itemsIds[0].split(',')                
+                    itemsIds: this.shapes.itemsIds.split(',')                
                 }
 
                 let data = {
@@ -386,7 +398,7 @@
                 this.addImageOnCanvas()
                 //this.coordinits = []
                 this.subcoordinates = []
-                this.scaleCanvas(this.scale)
+                //this.scaleCanvas(this.scale)
             },
             scaleCanvas(scale) {
                 this.scale = scale
@@ -468,7 +480,28 @@
                 FloorDataService.info(this.$route.params.id, this.$route.params.house_id, this.indexFloor)
                     .then(response => {
                         console.log('copyFloor', response)   
-                        this.fields.shapeId = response.data.item.shapeId       
+                        // this.defaultObject = false
+                        // this.fields.shapeId = response.data.item.shapeId    
+                        
+                        let data = {
+                            ProjectId: this.fields.ProjectId,
+                            houseId: this.fields.houseId,
+                            floorNum: this.fields.floorNum,
+                            image: response.data.item.image,
+                            width: response.data.item.width,
+                            height: response.data.item.height,
+                            shapeId: response.data.item.shapeId,
+                            itemsIds: this.shapes.itemsIds
+                        }
+
+                        FloorDataService.create(data)
+                        .then(response => {
+                            console.log(response)
+                        })
+                        .catch(e => {
+                            console.log('error create: ', e)
+                        })                        
+
                     })
                     .catch(e => {
                         console.log('error info: ', e)

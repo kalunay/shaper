@@ -17,7 +17,17 @@ module.exports = {
         const dataFloor = body.dataFloor
         console.log(body)
         const item = await Floors.findOneAndUpdate({ProjectId: id, houseId: house_id, floorNum: floor_id}, dataFloor, {new: true})
-        const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
+
+        let shape = {}
+        shape = await Shapes.findOne({shapeId: dataShape.shapeId})
+        if(shape){
+            shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})    
+        } else {
+            shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }
+
+        //const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
         return res.status(200).send('OK')
     },
     async getFloor(req, res){
@@ -51,7 +61,14 @@ module.exports = {
         const shape = new Shapes(dataShape)
         const newShape = await shape.save()
 
-        const object = await Floors.findOneAndUpdate({ProjectId: body.dataFloor.ProjectId, houseId: body.dataFloor.houseId, floorNum: body.dataFloor.floorNum}, dataFloor, {new: true})
+        const floor = await Floors.findOne({ProjectId: dataFloor.id, houseId: dataFloor.house_id, floorNum: dataFloor.floorNum})
+
+        if(!floor){
+            const item = new Floors(dataFloor)
+            const newItem = await item.save()
+        } else {
+            const object = await Floors.findOneAndUpdate({ProjectId: dataFloor.ProjectId, houseId: dataFloor.houseId, floorNum: dataFloor.floorNum}, dataFloor, {new: true})
+        }
 
         return res.status(200).send('OK')
     }
