@@ -141,7 +141,21 @@ h1 i {
 }
 .toast {
     position: fixed;
-    bottom: 20px;
+    bottom: -50px;
     right: 20px;
     z-index: 9999;
+    display: block !important;
+    opacity: 0;
 }
+
+.toast.show {
+  transition: bottom 1.5s, opacity  3s;
+  bottom: 20px;
+  opacity: 1;
+}
+
+.toast.hide {
+    transition: bottom 1.5s, opacity  3s;
+    bottom: -50px;
+    opacity: 0;
+  }

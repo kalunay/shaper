@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/'
 import components from './components'
+import store from './store'
 //import jQuery from 'jquery'
 //import { FeatherIcon } from 'feather-icons'
 //import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -26,4 +27,4 @@ components.components.forEach(component => {
 
 app.config.globalProperties.$axios = axios;
 
-app.use(router).mount('#app')
+app.use(store).use(router).mount('#app')

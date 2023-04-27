@@ -64,7 +64,7 @@
 
                 <div id="card">
                     <div class="card text-center">
-                        <div class="card-header">
+                        <div class="card-header"> 
                             Добавление квартир на этаже №{{ this.$route.params.floor_id }}
                             <span class="glyphicon glyphicon-menu-down" id="addForm"></span>
                         </div>
@@ -78,7 +78,8 @@
                                 <label>Координаты</label><br>
                                 <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
                                 <div class="b-coordinates">{{ shapes.coordinates }}</div>
-                            </div>                            
+                            </div>              
+            
                             <button type="button" class="btn btn-dark w-50" @click="saveObject()">Сохранить</button>
                             <button type="button" class="btn btn-warning w-50" @click="clearObject()">Очистить</button>
 
@@ -300,7 +301,8 @@
 
                 //console.log(this.house.sections.split(', '))
                 console.log(this.defaultObject)
-
+                //console.log(this.fields.itemsIds[0])
+                //console.log(this.shapes.itemsIds)
                 let dataFloor = {
                     ProjectId: this.fields.ProjectId,
                     houseId: this.$route.params.house_id,
@@ -309,7 +311,8 @@
                     image: this.fields.image,
                     width: this.fields.width,
                     height: this.fields.height,          
-                    itemsIds: ((this.fields.itemsIds.length > 0) ? this.fields.itemsIds.split(',') : [])
+                    //itemsIds: ((this.fields.itemsIds.length > 0 || this.fields.itemsIds[0].length > 0) ? this.fields.itemsIds.split(',') : [])
+                    itemsIds: ((this.fields.itemsIds.length > 0) ? this.fields.itemsIds : [])
                 }
 
                 //console.log(this.shapes.itemsIds[0].split(','))
@@ -320,7 +323,7 @@
                     width: this.fields.width,
                     height: this.fields.height, 
                     coordinates: this.shapes.coordinates,
-                    itemsIds: ((this.shapes.itemsIds.length > 0) ? this.shapes.itemsIds.split(',') : [])                
+                    itemsIds: ((this.shapes.itemsIds.length > 0) ? this.shapes.itemsIds : [])                
                 }
 
                 let data = {
@@ -333,6 +336,7 @@
                     FloorDataService.createShape(data)
                         .then(response => {
                             console.log(response)
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error create: ', e)
@@ -341,6 +345,7 @@
                     FloorDataService.update(data)
                         .then(response => {
                             console.log(response)
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error update: ', e)
