@@ -3,7 +3,6 @@
         <BreadCrumbs :links="links"></BreadCrumbs>
         <h1>Этаж №{{ this.$route.params.floor_id }}, <i>Дом №{{ this.$route.params.house_id }}</i>, <i>{{ object.name }}</i></h1>
 
-        {{ defaultObject }}
         <div class="b-pop-coordinates" v-if="subcoordinates.length > 0">
             {{ subcoordinates }}
             <div class="editPopUp">
@@ -72,7 +71,8 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label>ID квартир <i>([89101,89102,89103])</i></label>
-                                <input class="form-control" v-model="this.shapes.itemsIds" type="text" required>
+                                <input class="form-control" v-model="this.shapes.itemsIds" type="text" required v-if="copyCheck == false">
+                                <input class="form-control" v-model="this.fields.itemsIds" type="text" required v-else>
                             </div>
                             <div class="mb-3">
                                 <label>Координаты</label><br>
@@ -84,7 +84,7 @@
 
                             <div class="mb-3 mt-3"><label>Копировать координаты этажа</label></div>
                             <div class="mb-3 d-flex">
-                                <select class="form-control" v-model="indexFloor">
+                                <select class="form-control" v-model="indexFloor" @change="copyCheck = true">
                                     <option v-for="f,index in house.floors" :key="index" :value="f">{{ f }} этаж</option>
                                 </select>
                                 <button type="button" class="btn btn-danger" @click="copyFloor()">Копировать</button>                                
@@ -160,7 +160,8 @@
                 floors: [],
                 house: {},
                 delIndex: 0,
-                indexFloor: 0
+                indexFloor: 0,
+                copyCheck: false
             }
         },
         methods: {
@@ -260,14 +261,20 @@
                         this.fields.image = response.data['item'].image
                         this.fields.width = response.data['item'].width
                         this.fields.height = response.data['item'].height
-                        this.fields.shapeId = response.data['item'].shapeId   
+                        this.fields.shapeId = response.data['item'].shapeId  
+                        this.fields.itemsIds = response.data['item'].itemsIds
+                        
+                        if(response.data['item'].itemsIds.length > 0){
+                            this.copyCheck = true
+                        }
 
                         if(response.data['shape']){
                             this.shapes.coordinates = response.data['shape'].coordinates
                             
-                            this.shapes.itemsIds = ((response.data['item'].itemsIds.length > 0) ? response.data['item'].itemsIds : response.data['shape'].itemsIds)
+                            //this.shapes.itemsIds = ((response.data['item'].itemsIds.length > 0) ? response.data['item'].itemsIds : response.data['shape'].itemsIds)
 
                             this.shapes.shapeId = response.data['shape'].shapeId
+                            this.shapes.itemsIds = response.data['shape'].itemsIds
                         }
 
                         this.house = {...response.data['house']}
@@ -301,7 +308,8 @@
                     shapeId: timeDate,
                     image: this.fields.image,
                     width: this.fields.width,
-                    height: this.fields.height,               
+                    height: this.fields.height,          
+                    itemsIds: ((this.fields.itemsIds.length > 0) ? this.fields.itemsIds.split(',') : [])
                 }
 
                 //console.log(this.shapes.itemsIds[0].split(','))
@@ -312,7 +320,7 @@
                     width: this.fields.width,
                     height: this.fields.height, 
                     coordinates: this.shapes.coordinates,
-                    itemsIds: this.shapes.itemsIds.split(',')                
+                    itemsIds: ((this.shapes.itemsIds.length > 0) ? this.shapes.itemsIds.split(',') : [])                
                 }
 
                 let data = {
@@ -451,7 +459,7 @@
                         element.forEach(elem => {
                             //console.log(elem)
                             let coords = elem.split(',')
-                            ctx.lineTo(coords[0] * 2, coords[1] * 2)
+                            ctx.lineTo(coords[0] * 3, coords[1] * 3)
                             ctx.stroke()
                         });
                     });                    
@@ -477,6 +485,7 @@
             },
             copyFloor(){
                 console.log(this.indexFloor)
+                this.copyCheck = true
                 FloorDataService.info(this.$route.params.id, this.$route.params.house_id, this.indexFloor)
                     .then(response => {
                         console.log('copyFloor', response)   
@@ -487,11 +496,12 @@
                             ProjectId: this.fields.ProjectId,
                             houseId: this.fields.houseId,
                             floorNum: this.fields.floorNum,
+                            sameIds: this.indexFloor,
                             image: response.data.item.image,
                             width: response.data.item.width,
                             height: response.data.item.height,
                             shapeId: response.data.item.shapeId,
-                            itemsIds: this.shapes.itemsIds
+                            itemsIds: this.fields.itemsIds
                         }
 
                         FloorDataService.create(data)
@@ -506,6 +516,9 @@
                     .catch(e => {
                         console.log('error info: ', e)
                     })                
+            },
+            onChangeCopy(value){
+                console.log(value)
             }
         },
         beforeMount(){
