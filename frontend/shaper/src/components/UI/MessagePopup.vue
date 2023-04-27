@@ -12,6 +12,17 @@
 <script>
 export default {
     name: 'MessagePopup',
+    watch: {
+        '$store.state.messages.show': {
+            handler(newValue) {
+                console.log(newValue)
+                setTimeout(() => {
+                  this.hideMsg()
+                }, 3000)
+            },
+            immediate: false,
+        },
+    },
     methods: {
       hideMsg(){
         this.$store.state.messages.show = false
