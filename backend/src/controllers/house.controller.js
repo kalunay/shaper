@@ -15,14 +15,25 @@ module.exports = {
     async update({ params: {id, house_id}, body }, res){
         const dataShape = body.dataShape
         const dataHouse = body.dataHouse
+        console.log(dataShape)
         const item = await House.findOneAndUpdate({ProjectId: id, numHouse: house_id}, dataHouse, {new: true})
-        const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
+        //const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
+
+        let shape = {}
+        shape = await Shapes.findOne({shapeId: dataShape.shapeId})
+        if(shape){
+            shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})    
+        } else {
+            shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }
+
         return res.status(200).send('OK')
     },
     async getHouse(req, res){
         console.log(req.params.id)
-        const item = await House.find({ProjectId: req.params.id, numHouse: req.params.house_id})
-        const shape = await Shapes.find({shapeId: item[0].shapeId})
+        const item = await House.findOne({ProjectId: req.params.id, numHouse: req.params.house_id})
+        const shape = await Shapes.findOne({shapeId: item.shapeId})
         const newItem = {item,shape }
         return res.status(200).send(newItem)
 

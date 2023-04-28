@@ -169,8 +169,10 @@ export default {
         const button = document.getElementById('hiddenMenu')
 
         button.addEventListener('click', function () {
-            var navMenu = document.getElementById("sidebar");
+            let navMenu = document.getElementById("sidebar");
+            let canvas = document.getElementById("canvas");
             navMenu.classList.toggle("hide");
+            canvas.classList.toggle("hide");
         })
 
     },

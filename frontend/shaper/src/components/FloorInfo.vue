@@ -115,6 +115,8 @@
 <script>
     import ObjectsDataService from '@/services/ObjectsDataService'
     import FloorDataService from '@/services/FloorDataService'
+    //import { ref } from 'vue'
+import useCanvas from '@/hooks/useCanvas'
     export default {
         watch: {
             '$route.params': {
@@ -125,6 +127,23 @@
                 },
                 immediate: false,
             },
+            'shapes.itemsIds': {
+                handler(newValue){
+                    this.shapes.itemsIds = (Array.isArray(newValue) ? newValue : newValue.split(','))
+                },
+                immediate: false,
+            },
+            'fields.itemsIds': {
+                handler(newValue){
+                    this.fields.itemsIds = (Array.isArray(newValue) ? newValue : newValue.split(','))
+                },
+                immediate: false,
+            },
+            colorBrush: {
+                handler(newValue) {
+                    this.addImageOnCanvas(newValue)
+                }
+            }
         },
         name: "FloorInfo",
         data(){
@@ -165,11 +184,14 @@
                 copyCheck: false
             }
         },
+        setup(props){
+            const { addImageOnCanvas } = useCanvas()
+        },
         methods: {
             getObject(id){
                 ObjectsDataService.get(id)
                 .then(response => {
-                    this.object = response.data[0]
+                    this.object = response.data
                     console.log('getObject',this.object)
                 })
                 .catch(e => {
@@ -353,57 +375,57 @@
                 }    
 
             },
-            addImageOnCanvas() {
-                let canvas = document.getElementById("myCanvas")
-                canvas.width = this.fields.width
-                canvas.height = this.fields.height
-                let ctx = canvas.getContext('2d');
+            // addImageOnCanvas() {
+            //     let canvas = document.getElementById("myCanvas")
+            //     canvas.width = this.fields.width
+            //     canvas.height = this.fields.height
+            //     let ctx = canvas.getContext('2d');
 
-                //let coordinates = this.shapes.coordinates
-                //this.shapes.coordinates = coordinates
+            //     //let coordinates = this.shapes.coordinates
+            //     //this.shapes.coordinates = coordinates
 
-                // Create our image
-                let newImage = new Image();
-                newImage.src = '/images/' + this.fields.image
-                newImage.width = this.fields.width
-                newImage.height = this.fields.height
+            //     // Create our image
+            //     let newImage = new Image();
+            //     newImage.src = '/images/' + this.fields.image
+            //     newImage.width = this.fields.width
+            //     newImage.height = this.fields.height
 
-                // When it loads
-                newImage.onload = () => {
-                    console.log(newImage)
-                    // Draw the image onto the context with cropping
-                    ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
-                }
+            //     // When it loads
+            //     newImage.onload = () => {
+            //         console.log(newImage)
+            //         // Draw the image onto the context with cropping
+            //         ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
+            //     }
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = this.colorBrush
-                //ctx.scale(this.scale, this.scale)
-                let sc = this.scale
-                let coord = []
-                let ds = Math.ceil(this.fields.width / this.fields.height)
-                canvas.onmouseup = function (event) {
-                    let x = event.offsetX
-                    let y = event.offsetY
-                    ctx.lineTo(x, y); //рисуем линию
-                    coord.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
-                    //coordinits.push(Math.ceil(y/sc)/ds)
-                    ctx.stroke()
-                // this.getPathSvg()
-                }
+            //     ctx.lineWidth = 2;
+            //     ctx.strokeStyle = this.colorBrush
+            //     //ctx.scale(this.scale, this.scale)
+            //     let sc = this.scale
+            //     let coord = []
+            //     let ds = Math.ceil(this.fields.width / this.fields.height)
+            //     canvas.onmouseup = function (event) {
+            //         let x = event.offsetX
+            //         let y = event.offsetY
+            //         ctx.lineTo(x, y); //рисуем линию
+            //         coord.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
+            //         //coordinits.push(Math.ceil(y/sc)/ds)
+            //         ctx.stroke()
+            //     // this.getPathSvg()
+            //     }
 
-                canvas.ondblclick = (event) => {
-                    console.log(event)
-                    coord.pop()
-                    //coordinates.push(coord)
-                    this.subcoordinates = coord
-                    coord = []
-                // this.getPathSvg()
-                    ctx.closePath()
-                    ctx.beginPath()
-                    //console.log(coordinates)
-                }
+            //     canvas.ondblclick = (event) => {
+            //         console.log(event)
+            //         coord.pop()
+            //         //coordinates.push(coord)
+            //         this.subcoordinates = coord
+            //         coord = []
+            //     // this.getPathSvg()
+            //         ctx.closePath()
+            //         ctx.beginPath()
+            //         //console.log(coordinates)
+            //     }
 
-            },
+            // },
             clearCanvas() {
                 let canvas = document.getElementById("myCanvas")
                 let ctx = canvas.getContext('2d')

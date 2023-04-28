@@ -1,8 +1,21 @@
 <template>
-    <div v-for="obj in object" :key="obj.ProjectId" class="b-page-object">
+    <div class="b-page-object">
         <BreadCrumbs :links="links"></BreadCrumbs>
 
-        <h1>{{ obj.name }}</h1>
+        <h1>{{ object.name }}</h1>
+
+        <div class="b-pop-coordinates" v-if="subcoordinates.length > 0">
+            {{ subcoordinates }}
+            <div class="editPopUp">
+                <div>
+                    <input type="number" class="form-control form-contro-xs" size="2" v-model="floorEdit">
+                    <button class="btn btn-primary" @click="editToCoordinates()">Сохранить</button>
+                </div>
+                <div>
+                    <button class="btn btn-info" @click="addToCoordinates()">Добавить</button>
+                </div>
+            </div>
+        </div>
 
         <div class="container">
 
@@ -19,8 +32,8 @@
                 </div>
             </div>
 
-            <div class="row b-main-content">
-                <div class="col-10">
+            <div class="row b-main-content" id="main-content">
+                <div class="" id="canvas">
 
                     <div class="block-btn-group">
                         <div class="btn-group" role="group" aria-label="Basic example">
@@ -41,12 +54,15 @@
                             <div class="btn-group" role="group">
                                 <input type="color" v-model="colorBrush" />
                             </div>
-                        </div>
-                        <div class="btn-group" role="group" v-if="house.houses.length > 0">
+                            <button type="button" class="btn btn-danger" @click="drawShapes()">
+                                <i class="glyphicon glyphicon-tint"></i> Отрисовать
+                            </button>
+                        </div> 
+                        <div class="btn-group" role="group" v-if="fields.houses.length > 0">
                             <router-link 
                                 class="btn" 
                                 :class="btnColors[index]"
-                                v-for="index in house.houses" 
+                                v-for="index in fields.houses" 
                                 :key="index"                                
                                 :to="`/object/${this.fields.ProjectId}/house/${index}`"
                             >Дом #{{ index }}</router-link>
@@ -59,7 +75,7 @@
                         </canvas>                        
                     </div>
                 </div>
-                <div class="col-2">
+                <div id="card">
 
 
                     <!-- <svg :viewBox='this.getSizeForSvg()' xmlns="http://www.w3.org/2000/svg" v-if="coordinits.length > 0">
@@ -72,6 +88,7 @@
                     <div class="card text-center">
                         <div class="card-header">
                             Добавление дома
+                            <span class="glyphicon glyphicon-menu-down" id="addForm"></span>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
@@ -89,9 +106,18 @@
                             </div>
                             <input type="hidden" v-model="house.projectId">
                             <button type="button" class="btn btn-success w-100" @click="saveObject()">Сохранить</button>
+
+                            <div class="mb-3 mt-3"><label>Удалить координаты по индексу</label></div>
+                            <div class="mb-3 d-flex">
+                                <select class="form-control" v-model="delIndex">
+                                    <option v-for="coord,index in shapes.coordinates" :key="index">{{ index }}</option>
+                                </select>
+                                <button type="button" class="btn btn-danger" @click="deleteIndex()">Удалить</button>                                
+                            </div>                            
+
                         </div>
                         <div class="card-footer text-body-secondary">
-                            Объект: <i>{{ object[0].name }}</i>
+                            Объект: <i>{{ object.name }}</i>
                         </div>
                     </div>
 
@@ -128,9 +154,9 @@ export default {
     name: "ObjectInfo",
     data() {
         return {
-            object: null,
+            object: {},
             fields: {
-                ProjectId: 0,
+                ProjectId: this.$route.params.id,
                 houses: [],
                 sections: [],
                 shapeId: 0,
@@ -148,8 +174,8 @@ export default {
             svgPath: '',
             house: {
                 projectId: 0,
-                houses: '1,2,3',
-                sections: '[89101,89102,89103], [89201,89202,89203], [89301,89302,89303]',
+                houses: [],
+                sections: '',
                 shapeId: '',
                 image: '',
                 width: 0,
@@ -163,6 +189,8 @@ export default {
                 coordinates: [],
                 itemsIds: []
             },
+            subcoordinates: [],
+            floorEdit: 0,
             btnColors: ['btn-primary', 'btn-secondary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-dark']
         }
     },
@@ -170,9 +198,10 @@ export default {
         getObject(id) {
             ObjectsDataService.get(id)
                 .then(response => {
+                    console.log('getObject', response.data)
                     this.object = response.data
                     this.links = [
-                        {'header': response.data[0].name, 'path': `/object/${this.$route.params.id}`},
+                        {'header': response.data.name, 'path': `/object/${this.$route.params.id}`},
                     ]  
                     //console.log(this.object)
                 })
@@ -259,8 +288,8 @@ export default {
 
             let dataHouse = {
                 projectId: this.house.projectId,
-                houses: this.house.houses.split(','),
-                sections: this.house.sections.split(', '),
+                houses: (Array.isArray(this.house.houses) ? this.house.houses : this.house.houses.split(',')),
+                sections: (Array.isArray(this.house.sections) ? this.house.sections : this.house.sections.split(',')),
                 shapeId: timeDate,
                 image: this.fields.image,
                 width: this.fields.width,
@@ -286,6 +315,7 @@ export default {
             ObjectDataService.createShape(data)
                 .then(response => {
                     console.log(response)
+                    this.$store.commit('messages/setShow', true)
                 })
                 .catch(e => {
                     console.log('error create: ', e)
@@ -295,19 +325,19 @@ export default {
         infoObject() {
             ObjectDataService.info(this.fields.ProjectId)
                 .then(response => {
-                    console.log('image: ', response.data['item'][0].image)
-                    this.fields.image = response.data['item'][0].image
-                    this.fields.width = response.data['item'][0].width
-                    this.fields.height = response.data['item'][0].height
-                    this.fields.houses = response.data['item'][0].houses
-                    this.fields.sections = response.data['item'][0].sections
-                    this.fields.shapeId = response.data['item'][0].shapeId                    
+                    console.log('image: ', response.data['item'].image)
+                    this.fields.image = response.data['item'].image
+                    this.fields.width = response.data['item'].width
+                    this.fields.height = response.data['item'].height
+                    this.fields.houses = response.data['item'].houses
+                    this.fields.sections = response.data['item'].sections
+                    this.fields.shapeId = response.data['item'].shapeId                    
                     this.defaultObject = true
 
-                    this.house.houses = response.data['item'][0].houses
-                    this.house.sections = response.data['item'][0].sections
+                    this.house.houses = response.data['item'].houses
+                    this.house.sections = response.data['item'].sections
 
-                    this.shapes.coordinates = response.data['shape'][0].coordinates                   
+                    this.shapes.coordinates = response.data['shape'].coordinates                   
                 })
                 .catch(e => {
                     console.log('error info: ', e)
@@ -319,7 +349,7 @@ export default {
             canvas.height = this.fields.height
             let ctx = canvas.getContext('2d');
 
-            let coordinates = this.shapes.coordinates
+            //let coordinates = this.shapes.coordinates
             //this.shapes.coordinates = coordinates
 
             // Create our image
@@ -354,12 +384,13 @@ export default {
             canvas.ondblclick = (event) => {
                 console.log(event)
                 coord.pop()
-                coordinates.push(coord)
+                //coordinates.push(coord)
+                this.subcoordinates = coord
                 coord = []
                // this.getPathSvg()
                 ctx.closePath()
                 ctx.beginPath()
-                console.log(coordinates)
+                //console.log(coordinates)
             }
 
         },
@@ -386,14 +417,77 @@ export default {
         getPathSvg() {
             //return 'M ' + this.coordinits.join(" ") + ' Z'
             //return this.shapes.coordinates = this.coordinits
-            console.log('111111')
         },
         getSizeForSvg() {
             let ds = Math.ceil(this.fields.width / this.fields.height)
             return '0 0 ' + Math.ceil(this.fields.width / ds) + ' ' + Math.ceil(this.fields.height / ds)
+        },
+        addToCoordinates(){
+            this.shapes.coordinates.push(this.subcoordinates)
+            this.subcoordinates = []
+        },
+        editToCoordinates(){
+            console.log(this.floorEdit)
+            console.log(this.subcoordinates)
+            this.shapes.coordinates[this.floorEdit] = this.subcoordinates
+        },
+        clearObject(){
+            this.shapes.coordinates = []
+            this.fields.sections = []
+            this.fields.floors = []
+        },
+        drawShapes(){
+            console.log(this.shapes.coordinates)
+            let canvas = document.getElementById("myCanvas")
+            let ctx = canvas.getContext('2d')
+
+            let newImage = new Image();
+            newImage.src = '/images/' + this.fields.image
+            newImage.width = this.fields.width
+            newImage.height = this.fields.height
+
+            // When it loads
+            newImage.onload = () => {
+                ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
+
+                ctx.lineWidth = 1
+                ctx.strokeStyle = this.colorBrush
+
+                this.shapes.coordinates.forEach(element => {
+                    //console.log(element)
+                    element.forEach(elem => {
+                        //console.log(elem)
+                        let coords = elem.split(',')
+                        ctx.lineTo(coords[0] * 2, coords[1] * 2)
+                        ctx.stroke()
+                    });
+                });                    
+            }
+
+        },
+        deleteIndex(){
+            console.log(this.delIndex)
+            console.log(this.shapes.coordinates)
+            let value = this.delIndex
+            let arr = this.shapes.coordinates
+            arr = arr.filter(item => item !== value)
+            console.log(arr)
+
+            const array = this.shapes.coordinates;
+            const index = this.delIndex;
+            if (index > -1) { 
+                array.splice(index, 1);
+            }
+
+            console.log(array); 
+
         }
     },
+    beforeMount(){
+        this.getObject(this.$route.params.id)
+    },
     mounted() {
+        console.log(this.$route.params.id)
         this.getObject(this.$route.params.id)
         this.fields.ProjectId = this.$route.params.id
         this.house.projectId = this.$route.params.id
@@ -401,6 +495,13 @@ export default {
         setTimeout(() => {
             this.addImageOnCanvas()
         }, 1000);
+
+        const card = document.getElementById('addForm')
+
+        card.addEventListener('click', function () {
+            var navMenu = document.getElementById("main-content");
+            navMenu.classList.toggle("hidden");
+        })
 
         //    // size of image
         //    this.$axios.get('/images/logo-awardee-2023.jpg').then(response => {

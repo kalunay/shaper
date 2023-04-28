@@ -16,6 +16,8 @@
             </div>
         </div>
 
+        {{ defaultObject }}
+
         <div class="container">
             <div class="row">
                 <div class="col">
@@ -128,6 +130,12 @@
                 },
                 immediate: false,
             },
+            'fields.floors': {
+                handler(newValue){
+                    this.fields.floors = (Array.isArray(newValue) ? newValue : newValue.split(','))
+                },
+                immediate: false,
+            },
             colorBrush: {
                 handler(newValue) {
                     this.addImageOnCanvas(newValue)
@@ -158,7 +166,7 @@
                     itemsIds: []
                 },
                 subcoordinates: [],
-                defaultHouse: false,
+                defaultObject: false,
                 scale: 1,
                 listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
                 colorBrush: '#000',
@@ -170,7 +178,7 @@
             getObject(id){
                 ObjectsDataService.get(id)
                 .then(response => {
-                    this.object = response.data[0]
+                    this.object = response.data
                     console.log('getObject',this.object)
                 })
                 .catch(e => {
@@ -181,14 +189,18 @@
                 HouseDataService.info(this.$route.params.id, this.$route.params.house_id)
                     .then(response => {
                         console.log('getHouse', response)
-                        this.fields.image = response.data['item'][0].image
-                        this.fields.width = response.data['item'][0].width
-                        this.fields.height = response.data['item'][0].height
-                        this.fields.sections = response.data['item'][0].sections
-                        this.fields.floors = response.data['item'][0].floors
-                        this.fields.shapeId = response.data['item'][0].shapeId   
-                        this.shapes.coordinates = response.data['shape'][0].coordinates                    
-                        this.defaultObject = true                        
+                        this.fields.image = response.data['item'].image
+                        this.fields.width = response.data['item'].width
+                        this.fields.height = response.data['item'].height
+                        this.fields.sections = response.data['item'].sections
+                        this.fields.floors = response.data['item'].floors
+                        this.fields.shapeId = response.data['item'].shapeId   
+
+                        if(response.data['shape']){
+                            this.shapes.coordinates = response.data['shape'].coordinates
+                        }             
+
+                        if(Object.keys(response.data['item']).length > 0) { this.defaultObject = true }                    
                     })
                     .catch(e => {
                         console.log('error info: ', e)
@@ -239,6 +251,7 @@
                     HouseDataService.create(data)
                         .then(response => {
                             console.log(response)
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error create: ', e)
@@ -250,6 +263,7 @@
                             this.fields.image = response.data.image
                             this.getObject(this.$route.params.id)
                             //this.addImageOnCanvas()
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error update: ', e)
@@ -258,11 +272,7 @@
             },
             saveObject(){
 
-                let timeDate = this.fields.shapeId;
-
-                if (!this.defaultObject) {
-                    timeDate = Date.parse(new Date());
-                }
+                let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
 
                 //console.log(this.house.sections.split(', '))
                 console.log(this.defaultObject)
@@ -297,6 +307,7 @@
                     HouseDataService.createShape(data)
                         .then(response => {
                             console.log(response)
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error create: ', e)
@@ -305,6 +316,7 @@
                     HouseDataService.update(data)
                         .then(response => {
                             console.log(response)
+                            this.$store.commit('messages/setShow', true)
                         })
                         .catch(e => {
                             console.log('error update: ', e)
