@@ -58,8 +58,10 @@ module.exports = {
         const dataShape = body.dataShape
         const dataFloor = body.dataFloor
         
-        const shape = new Shapes(dataShape)
-        const newShape = await shape.save()
+        if(dataShape){
+            const shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }
 
         const floor = await Floors.findOne({ProjectId: dataFloor.id, houseId: dataFloor.house_id, floorNum: dataFloor.floorNum})
 

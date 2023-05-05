@@ -1,30 +1,34 @@
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
 
-export default function useCanvas(){
+export default function useCanvas(fields){
 
-    
+    const colorBrush = ref('#000')
+    const scale = ref(1)
+    const subcoordinates = ref([])
 
-    const addImageOnCanvas = computed(() => {
+
+    const addImageOnCanvas = async() => {
+        console.log('11111')
         let canvas = document.getElementById("myCanvas")
-        canvas.width = this.fields.width
-        canvas.height = this.fields.height
+        canvas.width = fields.width
+        canvas.height = fields.height
         let ctx = canvas.getContext('2d');
 
         let newImage = new Image();
-        newImage.src = '/images/' + this.fields.image
-        newImage.width = this.fields.width
-        newImage.height = this.fields.height
+        newImage.src = '/images/' + fields.image
+        newImage.width = fields.width
+        newImage.height = fields.height
 
         newImage.onload = () => {
             console.log(newImage)
-            ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
+            ctx.drawImage(newImage, 0, 0, fields.width, fields.height)
         }
 
         ctx.lineWidth = 2;
-        ctx.strokeStyle = this.colorBrush
-        let sc = this.scale
+        ctx.strokeStyle = colorBrush.value
+        let sc = scale.value
         let coord = []
-        let ds = Math.ceil(this.fields.width / this.fields.height)
+        let ds = Math.ceil(fields.width / fields.height)
         canvas.onmouseup = function (event) {
             let x = event.offsetX
             let y = event.offsetY
@@ -36,16 +40,18 @@ export default function useCanvas(){
         canvas.ondblclick = (event) => {
             console.log(event)
             coord.pop()
-            this.subcoordinates = coord
+            subcoordinates.value = coord
             coord = []
             ctx.closePath()
             ctx.beginPath()
 
         }
 
-    })
+    }
+
+    onMounted(addImageOnCanvas)
 
     return {
-        addImageOnCanvas
+        colorBrush, scale, subcoordinates
     }
 }

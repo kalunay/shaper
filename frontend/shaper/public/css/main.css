@@ -83,10 +83,12 @@ h1 i {
 
 .hidden #card .glyphicon-menu-down::before { content: "\002b"; }
 
-#canvas { width: calc(100% - 260px); }
+#canvas { width: calc(100% - 520px); }
+#canvas.hide,
+.hidden #canvas { width: calc(100% - 260px); }
+.hidden #canvas.hide { width: 100%; }
 #card { width: 260px; }
 .hidden #canvas { 
-    width: 100%; 
     transition: 1s;
     animation: show 3s 1;
     animation-fill-mode: forwards;
