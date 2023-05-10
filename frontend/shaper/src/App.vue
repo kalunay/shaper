@@ -4,7 +4,7 @@
     <div class="row">
       <div class="col-lg-12 d-flex">
         <side-bar />
-        <router-view/>
+        <div id="mainBlock"><router-view/></div>
       </div>
     </div>
   </div>

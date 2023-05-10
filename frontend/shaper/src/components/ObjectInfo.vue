@@ -2,88 +2,16 @@
     <div class="b-page-object">
         <BreadCrumbs :links="links"></BreadCrumbs>
 
-        <h1>{{ object.name }}</h1>
+        <h1>{{ item.name }}</h1>
 
-        <div class="b-pop-coordinates" v-if="subcoordinates.length > 0">
-            {{ subcoordinates }}
-            <div class="editPopUp">
-                <div>
-                    <input type="number" class="form-control form-contro-xs" size="2" v-model="floorEdit">
-                    <button class="btn btn-primary" @click="editToCoordinates()">Сохранить</button>
-                </div>
-                <div>
-                    <button class="btn btn-info" @click="addToCoordinates()">Добавить</button>
-                </div>
-            </div>
-        </div>
+        <sub-coordinates :floorEdit="floorEdit"></sub-coordinates>
 
         <div class="container">
 
-            <div class="row">
-                <div class="col">
-                    <input class="form-control form-control-lg" name="image" id="file" type="file" ref="file"
-                        @change="handleFileUpload()">
-                </div>
-
-                <input type="hidden" v-model="fields.ProjectId">
-
-                <div class="col">
-                    <button type="submit" class="btn btn-primary mb-3" @click.prevent="submitFile()">Сохранить</button>
-                </div>
-            </div>
-
             <div class="row b-main-content" id="main-content">
-                <div class="" id="canvas">
+                <draw-canvas :fields="fields" :shapes="shapes"></draw-canvas>
 
-                    <div class="block-btn-group">
-                        <div class="btn-group" role="group" aria-label="Basic example">
-                            <button type="button" class="btn btn-danger" @click="clearCanvas()">
-                                <i class="glyphicon glyphicon-trash"></i> Очистить
-                            </button>
-
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
-                                    <i class="glyphicon glyphicon-zoom-in"></i> Увеличить
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li v-for="s in listScale" :key="s">
-                                        <a class="dropdown-item" href="#" @click="scaleCanvas(s)">{{ s }}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="btn-group" role="group">
-                                <input type="color" v-model="colorBrush" />
-                            </div>
-                            <button type="button" class="btn btn-danger" @click="drawShapes()">
-                                <i class="glyphicon glyphicon-tint"></i> Отрисовать
-                            </button>
-                        </div> 
-                        <div class="btn-group" role="group" v-if="fields.houses.length > 0">
-                            <router-link 
-                                class="btn" 
-                                :class="btnColors[index]"
-                                v-for="index in fields.houses" 
-                                :key="index"                                
-                                :to="`/object/${this.fields.ProjectId}/house/${index}`"
-                            >Дом #{{ index }}</router-link>
-                        </div>
-                    </div>
-
-                    <div class="b-scroll">
-                        <canvas id="myCanvas">
-                            Your browser does not support the HTML5 canvas tag.
-                        </canvas>                        
-                    </div>
-                </div>
                 <div id="card">
-
-
-                    <!-- <svg :viewBox='this.getSizeForSvg()' xmlns="http://www.w3.org/2000/svg" v-if="coordinits.length > 0">
-                        <path
-                            fill="none"
-                            stroke="red"
-                             :d='this.getPathSvg()' />
-                    </svg> -->                    
 
                     <div class="card text-center">
                         <div class="card-header">
@@ -91,6 +19,9 @@
                             <span class="glyphicon glyphicon-menu-down" id="addForm"></span>
                         </div>
                         <div class="card-body">
+                            <div class="mb-3">
+                                <upload-image :data="fields" :service="service"></upload-image>
+                            </div>                            
                             <div class="mb-3">
                                 <label>Координаты</label><br>
                                 <!-- <textarea class="form-control" v-model="shapes.coordinates" disabled rows="3"></textarea> -->
@@ -105,7 +36,8 @@
                                 <textarea class="form-control" v-model="house.sections" rows="3"></textarea>
                             </div>
                             <input type="hidden" v-model="house.projectId">
-                            <button type="button" class="btn btn-success w-100" @click="saveObject()">Сохранить</button>
+                            <button type="button" class="btn btn-success w-50" @click="saveObject()">Сохранить</button>
+                            <button type="button" class="btn btn-warning w-50" @click="clear()">Очистить</button>
 
                             <div class="mb-3 mt-3"><label>Удалить координаты по индексу</label></div>
                             <div class="mb-3 d-flex">
@@ -117,7 +49,7 @@
 
                         </div>
                         <div class="card-footer text-body-secondary">
-                            Объект: <i>{{ object.name }}</i>
+                            Объект: <i>{{ item.name }}</i>
                         </div>
                     </div>
 
@@ -130,8 +62,10 @@
 </template>
 
 <script>
-import ObjectsDataService from '@/services/ObjectsDataService';
+//import ObjectsDataService from '@/services/ObjectsDataService';
 import ObjectDataService from '@/services/ObjectDataService';
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+import { clearObject, deleteForIndex, hideForm } from '@/utils' 
 
 export default {
     watch: {
@@ -191,98 +125,38 @@ export default {
             },
             subcoordinates: [],
             floorEdit: 0,
-            btnColors: ['btn-primary', 'btn-secondary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-dark']
+            btnColors: ['btn-primary', 'btn-secondary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-dark'],
+            service: 'ObjectsDataService'
         }
     },
     methods: {
-        getObject(id) {
-            ObjectsDataService.get(id)
-                .then(response => {
-                    console.log('getObject', response.data)
-                    this.object = response.data
-                    this.links = [
-                        {'header': response.data.name, 'path': `/object/${this.$route.params.id}`},
-                    ]  
-                    //console.log(this.object)
-                })
-                .catch(e => {
-                    console.log(e)
-                })
-        },
-        handleFileUpload() {
-            this.fields.image = this.$refs.file[0].files[0]
-            let reader = new FileReader();
-            let image = new Image()
-            let width = 0
-            let height = 0
-            reader.readAsDataURL(this.$refs.file[0].files[0]);
-            reader.onload = function (e) {
-                image.src = e.target.result;
-                image.onload = function () {
-                    width = this.width
-                    height = this.height
-                }
-            }
-            setTimeout(() => {
-                this.fields.width = width
-                this.fields.height = height
-            }, 300)
-        },
-        submitFile() {
+
+        ...mapMutations({
+            setId: 'object/setId',
+            setStatus: 'object/setStatus',
+            setShow: 'messages/setShow'
+        }),
+        ...mapActions({
+            getObject: 'object/getObject',
+            addImageOnCanvas: 'canvasTools/addImageOnCanvas',
+        }),
+
+        saveObject(){
+
+            let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
+
             let formData = new FormData();
             formData.append('file', this.fields.image);
 
-            ObjectDataService.upload(formData)
+            if(this.fields.image){
+                ObjectDataService.upload(formData)
                 .then(response => {
-                    //return response
-                    //this.fields.image = response.data[0].image.name
                     console.log(response)
                 })
                 .catch(e => {
                     console.log('error upload image: ', e)
                 })
-
-            //console.log(formData);
-
-            // console.log('image: ', this.fields.image)
-
-            let data = {
-                ProjectId: this.fields.ProjectId,
-                image: this.fields.image.name,
-                width: this.fields.width,
-                height: this.fields.height,
-            }
-
-            //console.log('DATA: ', data)
-            //console.log('default image: ', this.defaultObject)
-            if (!this.defaultObject) {
-                ObjectDataService.create(data)
-                    .then(response => {
-                        console.log(response)
-                    })
-                    .catch(e => {
-                        console.log('error create: ', e)
-                    })
-            } else {
-                ObjectDataService.update(data)
-                    .then(response => {
-                        console.log('update: ', response)
-                        this.fields.image = response.data.image
-                        this.infoObject()
-                        this.addImageOnCanvas()
-                    })
-                    .catch(e => {
-                        console.log('error update: ', e)
-                    })
-            }
-
-            //console.log(this.fields.image)
-
-
-        },
-        saveObject(){
-
-            let timeDate = Date.parse(new Date());
+            } 
 
             //console.log(this.house.sections.split(', '))
 
@@ -291,7 +165,7 @@ export default {
                 houses: (Array.isArray(this.house.houses) ? this.house.houses : this.house.houses.split(',')),
                 sections: (Array.isArray(this.house.sections) ? this.house.sections : this.house.sections.split(',')),
                 shapeId: timeDate,
-                image: this.fields.image,
+                image: this.fields.image.name,
                 width: this.fields.width,
                 height: this.fields.height,               
             }
@@ -315,7 +189,7 @@ export default {
             ObjectDataService.createShape(data)
                 .then(response => {
                     console.log(response)
-                    this.$store.commit('messages/setShow', true)
+                    this.setShow(true)
                 })
                 .catch(e => {
                     console.log('error create: ', e)
@@ -343,177 +217,39 @@ export default {
                     console.log('error info: ', e)
                 })
         },
-        addImageOnCanvas() {
-            let canvas = document.getElementById("myCanvas")
-            canvas.width = this.fields.width
-            canvas.height = this.fields.height
-            let ctx = canvas.getContext('2d');
-
-            //let coordinates = this.shapes.coordinates
-            //this.shapes.coordinates = coordinates
-
-            // Create our image
-            let newImage = new Image();
-            newImage.src = '/images/' + this.fields.image
-            newImage.width = this.fields.width
-            newImage.height = this.fields.height
-
-            // When it loads
-            newImage.onload = () => {
-                console.log(newImage)
-                // Draw the image onto the context with cropping
-                ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
-            }
-
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = this.colorBrush
-            //ctx.scale(this.scale, this.scale)
-            let sc = this.scale
-            let coord = []
-            let ds = Math.ceil(this.fields.width / this.fields.height)
-            canvas.onmouseup = function (event) {
-                let x = event.offsetX
-                let y = event.offsetY
-                ctx.lineTo(x, y); //рисуем линию
-                coord.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
-                //coordinits.push(Math.ceil(y/sc)/ds)
-                ctx.stroke()
-               // this.getPathSvg()
-            }
-
-            canvas.ondblclick = (event) => {
-                console.log(event)
-                coord.pop()
-                //coordinates.push(coord)
-                this.subcoordinates = coord
-                coord = []
-               // this.getPathSvg()
-                ctx.closePath()
-                ctx.beginPath()
-                //console.log(coordinates)
-            }
-
-        },
-        clearCanvas() {
-            let canvas = document.getElementById("myCanvas")
-            let ctx = canvas.getContext('2d')
-            ctx.clearRect(0, 0, this.fields.width, this.fields.height)
-            this.addImageOnCanvas()
-            //this.coordinits = []
-            this.house = {
-                projectId: 0,
-                numHouse: 0,
-                sections: ''
-            }
-        },
-        scaleCanvas(scale) {
-            this.scale = scale
-            this.fields.width *= scale
-            this.fields.height *= scale
-            this.addImageOnCanvas()
-            console.log(this.fields.width)
-            console.log(this.fields.height)
-        },
-        getPathSvg() {
-            //return 'M ' + this.coordinits.join(" ") + ' Z'
-            //return this.shapes.coordinates = this.coordinits
-        },
-        getSizeForSvg() {
-            let ds = Math.ceil(this.fields.width / this.fields.height)
-            return '0 0 ' + Math.ceil(this.fields.width / ds) + ' ' + Math.ceil(this.fields.height / ds)
-        },
-        addToCoordinates(){
-            this.shapes.coordinates.push(this.subcoordinates)
-            this.subcoordinates = []
-        },
-        editToCoordinates(){
-            console.log(this.floorEdit)
-            console.log(this.subcoordinates)
-            this.shapes.coordinates[this.floorEdit] = this.subcoordinates
-        },
-        clearObject(){
-            this.shapes.coordinates = []
-            this.fields.sections = []
-            this.fields.floors = []
-        },
-        drawShapes(){
-            console.log(this.shapes.coordinates)
-            let canvas = document.getElementById("myCanvas")
-            let ctx = canvas.getContext('2d')
-
-            let newImage = new Image();
-            newImage.src = '/images/' + this.fields.image
-            newImage.width = this.fields.width
-            newImage.height = this.fields.height
-
-            // When it loads
-            newImage.onload = () => {
-                ctx.drawImage(newImage, 0, 0, this.fields.width, this.fields.height)
-
-                ctx.lineWidth = 1
-                ctx.strokeStyle = this.colorBrush
-
-                this.shapes.coordinates.forEach(element => {
-                    //console.log(element)
-                    element.forEach(elem => {
-                        //console.log(elem)
-                        let coords = elem.split(',')
-                        ctx.lineTo(coords[0] * 2, coords[1] * 2)
-                        ctx.stroke()
-                    });
-                });                    
-            }
-
-        },
+        clear(){
+            return clearObject(this.shapes)
+        },            
         deleteIndex(){
-            console.log(this.delIndex)
-            console.log(this.shapes.coordinates)
-            let value = this.delIndex
-            let arr = this.shapes.coordinates
-            arr = arr.filter(item => item !== value)
-            console.log(arr)
-
-            const array = this.shapes.coordinates;
-            const index = this.delIndex;
-            if (index > -1) { 
-                array.splice(index, 1);
-            }
-
-            console.log(array); 
-
-        }
+            return this.shapes.coordinates = deleteForIndex(this.delIndex, this.shapes.coordinates)
+        },
     },
     beforeMount(){
         this.getObject(this.$route.params.id)
     },
     mounted() {
         console.log(this.$route.params.id)
-        this.getObject(this.$route.params.id)
+        this.setId(this.$route.params.id)
+        this.getObject()
+        hideForm()
         this.fields.ProjectId = this.$route.params.id
         this.house.projectId = this.$route.params.id
         this.infoObject()
-        setTimeout(() => {
-            this.addImageOnCanvas()
-        }, 1000);
-
-        const card = document.getElementById('addForm')
-
-        card.addEventListener('click', function () {
-            var navMenu = document.getElementById("main-content");
-            navMenu.classList.toggle("hidden");
-        })
-
-        //    // size of image
-        //    this.$axios.get('/images/logo-awardee-2023.jpg').then(response => {
-
-        //     // get body data
-        //     console.log('vue resourses: ', response);
-
-        //     }, response => {
-        //     // error callback
-        //     console.log(response)
-        //     });
     },
+    beforeUpdate(){
+        this.links = [
+            {'header': this.item.name, 'path': `/object/${this.$route.params.id}`}
+        ]  
+    },
+    computed: {
+        ...mapState({
+            item: state => state.object.item,
+            id: state => state.object.id,
+            status: state => state.object.status
+        }),
+        ...mapGetters({
+        })
+    }
 
 }
 </script>

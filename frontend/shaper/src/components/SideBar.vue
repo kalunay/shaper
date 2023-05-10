@@ -170,9 +170,9 @@ export default {
 
         button.addEventListener('click', function () {
             let navMenu = document.getElementById("sidebar");
-            let canvas = document.getElementById("canvas");
+            let mainBlock = document.getElementById("mainBlock");
             navMenu.classList.toggle("hide");
-            canvas.classList.toggle("hide");
+            mainBlock.classList.toggle("hide");
         })
 
     },

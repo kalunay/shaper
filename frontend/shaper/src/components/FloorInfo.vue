@@ -33,7 +33,7 @@
                             </div>              
             
                             <button type="button" class="btn btn-dark w-50" @click="saveObject()">Сохранить</button>
-                            <button type="button" class="btn btn-warning w-50" @click="clearObject()">Очистить</button>
+                            <button type="button" class="btn btn-warning w-50" @click="clear()">Очистить</button>
 
                             <div class="mb-3 mt-3"><label>Копировать координаты этажа</label></div>
                             <div class="mb-3 d-flex">
@@ -67,6 +67,7 @@
 <script>
     import FloorDataService from '@/services/FloorDataService'
     import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+    import { clearObject, deleteForIndex, hideForm } from '@/utils'  
     export default {
         watch: {
             '$route.params': {
@@ -136,6 +137,7 @@
             }),
             ...mapActions({
                 getObject: 'object/getObject',
+                addImageOnCanvas: 'canvasTools/addImageOnCanvas',
             }),
                     
             getFloor() {
@@ -225,22 +227,11 @@
                 }    
 
             },
-            clearObject(){
-                this.shapes.coordinates = []
-                this.shapes.itemsIds = []
+            clear(){
+                return clearObject(this.shapes)
             },            
             deleteIndex(){
-                let value = this.delIndex
-                let arr = this.shapes.coordinates
-                arr = arr.filter(item => item !== value)
-                console.log(arr)
-
-                const array = this.shapes.coordinates;
-                const index = this.delIndex;
-                if (index > -1) { 
-                    array.splice(index, 1);
-                }
-
+                return this.shapes.coordinates = deleteForIndex(this.delIndex, this.shapes.coordinates)
             },
             copyFloor(){
                 FloorDataService.info(this.$route.params.id, this.$route.params.house_id, this.indexFloor)
@@ -278,12 +269,7 @@
             this.getFloor()
             this.setId(this.$route.params.id)
             this.getObject()
-
-            const card = document.getElementById('addForm')
-            card.addEventListener('click', function () {
-                var navMenu = document.getElementById("main-content");
-                navMenu.classList.toggle("hidden");
-            })
+            hideForm()
         },
         beforeUpdate(){
             this.links = [

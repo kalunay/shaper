@@ -1,5 +1,6 @@
 import ObjectsDataService from '@/services/ObjectsDataService'
 import FloorDataService from '@/services/FloorDataService'
+import HouseDataService from '@/services/HouseDataService'
 
 export const objectModule = {
     state: () => ({
@@ -45,7 +46,8 @@ export const objectModule = {
         async submitFile({state}){
 
             let services = {
-                FloorDataService: FloorDataService
+                FloorDataService: FloorDataService,
+                HouseDataService: HouseDataService
             }
 
             let formData = new FormData();

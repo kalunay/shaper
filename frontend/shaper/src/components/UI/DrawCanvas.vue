@@ -24,6 +24,22 @@
                     <i class="glyphicon glyphicon-tint"></i> Отрисовать
                 </button>
             </div>
+            <div class="btn-group" role="group" v-if="fields.floors !== undefined">
+                <router-link 
+                    class="btn btn-light" 
+                    v-for="index in fields.floors" 
+                    :key="index"                                
+                    :to="`/object/${this.fields.ProjectId}/house/${this.$route.params.house_id}/floor/${index}`"
+                >Этаж #{{ index }}</router-link>
+            </div>
+            <div class="btn-group" role="group" v-if="fields.houses !== undefined">
+                <router-link 
+                    class="btn btn-light" 
+                    v-for="index in fields.houses" 
+                    :key="index"                                
+                    :to="`/object/${this.fields.ProjectId}/house/${index}`"
+                >Дом #{{ index }}</router-link>
+            </div>
         </div>
 
         <div class="b-scroll">    
@@ -53,7 +69,8 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
         watch: {
             'colorBrush': {
                 handler(newValue) {
-                    this.colorBrush = newValue
+                    this.setBrush(newValue)
+                    console.log(newValue)
                     this.addImageOnCanvas()
                 },
                 immediate: false,
@@ -64,7 +81,8 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
             ...mapMutations({
                 subcoordinates: 'canvasTools/setSubcoordinates',
                 setShapes: 'canvasTools/setShapes',
-                setFields: 'canvasTools/setFields'
+                setFields: 'canvasTools/setFields',
+                setBrush: 'canvasTools/setBrush'
             }),
 
             ...mapActions({
@@ -115,7 +133,7 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
                     this.shapes.coordinates.forEach(element => {
                         element.forEach(elem => {
                             let coords = elem.split(',')
-                            ctx.lineTo(coords[0] * 3, coords[1] * 3)
+                            ctx.lineTo(coords[0] * 2, coords[1] * 2)
                             ctx.stroke()
                         });
                     });                    
@@ -139,7 +157,8 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
         computed: {
             ...mapState({
                 attrs: state => state.canvasTools.fields,
-                shapes: state => state.canvasTools.shapes
+                shapes: state => state.canvasTools.shapes,
+                colorBrush: state => state.canvasTools.colorBrush
             }),
             ...mapGetters({
             })
