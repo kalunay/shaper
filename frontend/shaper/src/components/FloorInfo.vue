@@ -72,7 +72,8 @@
         watch: {
             '$route.params': {
                 handler(newValue) {
-                    this.setId(newValue)
+                    this.setId(newValue.id)
+                    this.getObject()
                     this.getFloor()
                     this.addImageOnCanvas()
                 },

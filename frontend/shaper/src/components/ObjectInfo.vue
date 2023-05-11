@@ -71,8 +71,9 @@ export default {
     watch: {
         '$route.params': {
             handler(newValue) {
-                this.getObject(newValue.id)
-                this.fields.ProjectId = this.$route.params.id
+                this.setId(newValue.id)
+                this.getObject()
+                this.fields.ProjectId = newValue.id
                 this.infoObject()
                 this.addImageOnCanvas()
             },
@@ -134,6 +135,7 @@ export default {
         ...mapMutations({
             setId: 'object/setId',
             setStatus: 'object/setStatus',
+            setItem: 'object/setItem',
             setShow: 'messages/setShow'
         }),
         ...mapActions({
@@ -199,6 +201,7 @@ export default {
         infoObject() {
             ObjectDataService.info(this.fields.ProjectId)
                 .then(response => {
+                    console.log('infoObject', response.data['item'])
                     console.log('image: ', response.data['item'].image)
                     this.fields.image = response.data['item'].image
                     this.fields.width = response.data['item'].width
@@ -214,7 +217,7 @@ export default {
                     this.shapes.coordinates = response.data['shape'].coordinates                   
                 })
                 .catch(e => {
-                    console.log('error info: ', e)
+                    console.log('error info 1: ', e)
                 })
         },
         clear(){
@@ -225,7 +228,8 @@ export default {
         },
     },
     beforeMount(){
-        this.getObject(this.$route.params.id)
+        this.setId(this.$route.params.id)
+        this.getObject()
     },
     mounted() {
         console.log(this.$route.params.id)
@@ -235,6 +239,7 @@ export default {
         this.fields.ProjectId = this.$route.params.id
         this.house.projectId = this.$route.params.id
         this.infoObject()
+        this.addImageOnCanvas()
     },
     beforeUpdate(){
         this.links = [

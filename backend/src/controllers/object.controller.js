@@ -2,8 +2,13 @@ const { Object, Shapes } = require('../models');
 
 module.exports = {
     async getInfo({ params: id }, res){
-        const item = await Object.findOne({ProjectId: id.id});
-        const shape = await Shapes.findOne({shapeId: item.shapeId}) 
+        let item = await Object.findOne({ProjectId: id.id});
+        let shape = {}
+        if(item){
+            shape = await Shapes.findOne({shapeId: item.shapeId}) 
+        } else {
+            item = {}
+        }
         const newItem = {item,shape }
         console.log(newItem)
         return res.status(200).send(newItem)

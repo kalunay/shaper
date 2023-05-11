@@ -74,6 +74,12 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
                     this.addImageOnCanvas()
                 },
                 immediate: false,
+            },
+            'fields.image': {
+                handler(newValue) {
+                    this.addImageOnCanvas(newValue)
+                },
+                immediate: false,
             }
         },
         methods:{

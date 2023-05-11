@@ -66,8 +66,9 @@
         watch: {
             '$route.params': {
                 handler(newValue) {
-                    this.setId(newValue)
-                    this.fields.ProjectId = this.$route.params.id
+                    this.setId(newValue.id)
+                    this.getObject()
+                    this.fields.ProjectId = newValue.id
                     this.getHouse()
                     this.addImageOnCanvas()
                 },
