@@ -32,10 +32,10 @@ export const canvasModule = {
             canvas.width = state.fields.width
             canvas.height = state.fields.height
             let ctx = canvas.getContext('2d');
-
+            console.log('addImageOnCanvas', state.fields.image)
             // Create our image
             let newImage = new Image();
-            newImage.src = '/images/' + state.fields.image
+            newImage.src = '/images/' + ((state.fields.image.name) ? state.fields.image.name : state.fields.image)
             newImage.width = state.fields.width
             newImage.height = state.fields.height
 

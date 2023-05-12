@@ -53,17 +53,29 @@ module.exports = {
         return res.status(200).send(newItem)
     },
     async createshape({ body }, res){
-        //console.log(body.dataHouse.projectId)
+        //console.log(body.dataFloor.ProjectId)
 
         const dataShape = body.dataShape
         const dataFloor = body.dataFloor
         
-        if(dataShape){
-            const shape = new Shapes(dataShape)
-            const newShape = await shape.save()
-        }
+        // if(dataShape){
+        //     const shape = new Shapes(dataShape)
+        //     const newShape = await shape.save()
+        // }
 
-        const floor = await Floors.findOne({ProjectId: dataFloor.id, houseId: dataFloor.house_id, floorNum: dataFloor.floorNum})
+        let shape = {}
+        shape = await Shapes.findOne({shapeId: dataShape.shapeId})
+        console.log('shape', shape)
+        if(shape){
+            shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})    
+        } else {
+            shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }        
+
+        const floor = await Floors.findOne({ProjectId: dataFloor.ProjectId, houseId: dataFloor.house_id, floorNum: dataFloor.floorNum})
+
+        console.log('floor', floor)
 
         if(!floor){
             const item = new Floors(dataFloor)

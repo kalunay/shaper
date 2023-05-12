@@ -11,8 +11,7 @@ const schema = new Schema({
     },
     floorNum: {
         type: Number,
-        default: 0,
-        unique: true
+        default: 0
     },
     shapeId: Number,
     sameIds: Number,

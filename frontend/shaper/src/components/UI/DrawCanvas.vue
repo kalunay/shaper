@@ -120,7 +120,7 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
             },         
             
             drawShapes(){
-                console.log(this.shapes.coordinates)
+                //console.log(this.shapes.coordinates)
                 let canvas = document.getElementById("myCanvas")
                 let ctx = canvas.getContext('2d')
 
@@ -137,11 +137,14 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
                     ctx.strokeStyle = this.colorBrush
 
                     this.shapes.coordinates.forEach(element => {
+                        console.log(element)
+                        ctx.beginPath()
                         element.forEach(elem => {
                             let coords = elem.split(',')
                             ctx.lineTo(coords[0] * 2, coords[1] * 2)
                             ctx.stroke()
                         });
+                        ctx.closePath()
                     });                    
                 }
 

@@ -123,7 +123,8 @@
             ...mapMutations({
                 setId: 'object/setId',
                 setStatus: 'object/setStatus',
-                setShow: 'messages/setShow'
+                setShow: 'messages/setShow',
+                setFields: 'canvasTools/setFields',
             }),
             ...mapActions({
                 getObject: 'object/getObject',
@@ -155,14 +156,14 @@
             saveObject(){
 
                 let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
-
-                let formData = new FormData();
-                formData.append('file', this.fields.image);
-
-                if(this.fields.image){
+                
+                if(!this.fields.image){
+                    let formData = new FormData();
+                    formData.append('file', this.fields.image);
                     HouseDataService.upload(formData)
                     .then(response => {
                         console.log(response)
+                        this.addImageOnCanvas()
                     })
                     .catch(e => {
                         console.log('error upload image: ', e)
@@ -185,7 +186,7 @@
 
                 let dataShape = {
                     shapeId: timeDate,
-                    image: this.fields.image,
+                    image: this.fields.image.name,
                     width: this.fields.width,
                     height: this.fields.height, 
                     coordinates: this.shapes.coordinates,
@@ -203,6 +204,7 @@
                         .then(response => {
                             console.log(response)
                             this.setShow(true)
+                            this.addImageOnCanvas()
                         })
                         .catch(e => {
                             console.log('error create: ', e)
@@ -212,9 +214,10 @@
                         .then(response => {
                             console.log(response)
                             this.setShow(true)
+                            this.addImageOnCanvas()
                         })
                         .catch(e => {
-                            console.log('error update: ', e)
+                            console.log('error update1: ', e)
                         })
                 }    
 

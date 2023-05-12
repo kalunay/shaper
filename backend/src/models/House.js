@@ -9,8 +9,7 @@ const schema = new Schema({
     shapeId: Number,
     numHouse: {
         type: Number,
-        default: 0,
-        unique: true
+        default: 0
     },
     sections: {
         type: Array

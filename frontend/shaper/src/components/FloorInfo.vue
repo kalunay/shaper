@@ -169,13 +169,13 @@
 
                 let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
 
-                let formData = new FormData();
-                formData.append('file', this.fields.image);
-
-                if(this.fields.image){
+                if(!this.fields.image){
+                    let formData = new FormData();
+                    formData.append('file', this.fields.image);
                     FloorDataService.upload(formData)
                     .then(response => {
                         console.log(response)
+                        this.addImageOnCanvas()
                     })
                     .catch(e => {
                         console.log('error upload image: ', e)
@@ -212,6 +212,8 @@
                         .then(response => {
                             console.log('createShape',response)
                             this.setShow(true)
+                            this.addImageOnCanvas()
+                            this.getFloor()
                         })
                         .catch(e => {
                             console.log('error create: ', e)
@@ -221,6 +223,7 @@
                         .then(response => {
                             console.log(response)
                             this.setShow(true)
+                            this.addImageOnCanvas()
                         })
                         .catch(e => {
                             console.log('error update: ', e)

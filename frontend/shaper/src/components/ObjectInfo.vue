@@ -147,13 +147,14 @@ export default {
 
             let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
 
-            let formData = new FormData();
-            formData.append('file', this.fields.image);
-
-            if(this.fields.image){
+            if(!this.fields.image){
+                let formData = new FormData();
+                formData.append('file', this.fields.image);
+                this.fields.image = this.$refs.file[0].files[0]
                 ObjectDataService.upload(formData)
                 .then(response => {
                     console.log(response)
+                    this.addImageOnCanvas()
                 })
                 .catch(e => {
                     console.log('error upload image: ', e)
@@ -163,7 +164,7 @@ export default {
             //console.log(this.house.sections.split(', '))
 
             let dataHouse = {
-                projectId: this.house.projectId,
+                ProjectId: this.fields.ProjectId,
                 houses: (Array.isArray(this.house.houses) ? this.house.houses : this.house.houses.split(',')),
                 sections: (Array.isArray(this.house.sections) ? this.house.sections : this.house.sections.split(',')),
                 shapeId: timeDate,
@@ -174,7 +175,7 @@ export default {
 
             let dataShape = {
                 shapeId: timeDate,
-                image: this.fields.image,
+                image: this.fields.image.name,
                 width: this.fields.width,
                 height: this.fields.height, 
                 coordinates: this.shapes.coordinates,
@@ -192,6 +193,7 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.setShow(true)
+                    this.addImageOnCanvas()
                 })
                 .catch(e => {
                     console.log('error create: ', e)
@@ -221,10 +223,10 @@ export default {
                 })
         },
         clear(){
-            return clearObject(this.shapes)
+            clearObject(this.shapes)
         },            
         deleteIndex(){
-            return this.shapes.coordinates = deleteForIndex(this.delIndex, this.shapes.coordinates)
+            this.shapes.coordinates = deleteForIndex(this.delIndex, this.shapes.coordinates)
         },
     },
     beforeMount(){

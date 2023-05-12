@@ -40,11 +40,33 @@ module.exports = {
 
         const dataShape = body.dataShape
         const dataHouse = body.dataHouse
-        
-        const shape = new Shapes(dataShape)
-        const newShape = await shape.save()
 
-        const object = await Object.findOneAndUpdate({ProjectId: body.dataHouse.projectId}, dataHouse, {new: true})
+        console.log(dataShape)
+        console.log(dataHouse)
+        
+        // const shape = new Shapes(dataShape)
+        // const newShape = await shape.save()
+
+        let shape = {}
+        shape = await Shapes.findOne({shapeId: dataShape.shapeId})
+        if(shape){
+            shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})    
+        } else {
+            shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }
+
+        let object = {}
+        object = await Object.findOne({ProjectId: body.dataHouse.ProjectId})
+
+        console.log(object)
+
+        if(object){
+            object = await Object.findOneAndUpdate({ProjectId: body.dataHouse.ProjectId}, dataHouse, {new: true})
+        } else {
+            const item = new Object(dataHouse)
+            const newItem = await item.save()
+        }
 
         return res.status(200).send('OK')
     },

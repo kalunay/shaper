@@ -15,7 +15,7 @@ module.exports = {
     async update({ params: {id, house_id}, body }, res){
         const dataShape = body.dataShape
         const dataHouse = body.dataHouse
-        console.log(dataShape)
+        // console.log(dataShape)
         const item = await House.findOneAndUpdate({ProjectId: id, numHouse: house_id}, dataHouse, {new: true})
         //const shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})
 
@@ -33,7 +33,15 @@ module.exports = {
     async getHouse(req, res){
         console.log(req.params.id)
         const item = await House.findOne({ProjectId: req.params.id, numHouse: req.params.house_id})
-        const shape = await Shapes.findOne({shapeId: item.shapeId})
+        //const shape = await Shapes.findOne({shapeId: item.shapeId})
+
+        let shape = {}
+        if(item){
+            shape = await Shapes.findOne({shapeId: item.shapeId}) 
+        } else {
+            item = {}
+        }
+
         const newItem = {item,shape }
         return res.status(200).send(newItem)
 
@@ -45,10 +53,31 @@ module.exports = {
         const dataShape = body.dataShape
         const dataHouse = body.dataHouse
         
-        const shape = new Shapes(dataShape)
-        const newShape = await shape.save()
+        // const shape = new Shapes(dataShape)
+        // const newShape = await shape.save()
 
-        const object = await House.findOneAndUpdate({ProjectId: body.dataHouse.projectId, numHouse: body.dataHouse.numHouse}, dataHouse, {new: true})
+        // const object = await House.findOneAndUpdate({ProjectId: body.dataHouse.projectId, numHouse: body.dataHouse.numHouse}, dataHouse, {new: true})
+
+        let shape = {}
+        shape = await Shapes.findOne({shapeId: dataShape.shapeId})
+        if(shape){
+            shape = await Shapes.findOneAndUpdate({shapeId: dataShape.shapeId}, dataShape, {new: true})    
+        } else {
+            shape = new Shapes(dataShape)
+            const newShape = await shape.save()
+        }
+
+        let object = {}
+        object = await House.findOne({ProjectId: body.dataHouse.ProjectId, numHouse: body.dataHouse.numHouse})
+
+        console.log(object)
+
+        if(object){
+            object = await House.findOneAndUpdate({ProjectId: body.dataHouse.ProjectId, numHouse: body.dataHouse.numHouse}, dataHouse, {new: true})
+        } else {
+            const item = new House(dataHouse)
+            const newItem = await item.save()
+        }
 
         return res.status(200).send('OK')
     }
