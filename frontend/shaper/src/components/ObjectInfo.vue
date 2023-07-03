@@ -9,7 +9,7 @@
         <div class="container">
 
             <div class="row b-main-content" id="main-content">
-                <draw-canvas :fields="fields" :shapes="shapes"></draw-canvas>
+                <draw-canvas :fields="fields"></draw-canvas>
 
                 <div id="card">
 
@@ -126,6 +126,7 @@ export default {
             },
             subcoordinates: [],
             floorEdit: 0,
+            delIndex: 0,
             btnColors: ['btn-primary', 'btn-secondary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-dark'],
             service: 'ObjectsDataService'
         }
@@ -136,7 +137,8 @@ export default {
             setId: 'object/setId',
             setStatus: 'object/setStatus',
             setItem: 'object/setItem',
-            setShow: 'messages/setShow'
+            setShow: 'messages/setShow',
+            setShapes: 'canvasTools/setShapes',
         }),
         ...mapActions({
             getObject: 'object/getObject',
@@ -241,6 +243,7 @@ export default {
         this.fields.ProjectId = this.$route.params.id
         this.house.projectId = this.$route.params.id
         this.infoObject()
+        this.setShapes(this.shapes)
         this.addImageOnCanvas()
     },
     beforeUpdate(){

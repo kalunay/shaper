@@ -2,8 +2,8 @@ const { House, Shapes } = require('../models')
 
 module.exports = {
     async upload(req, res){
+        console.log('upload image', req.files.file)
         req.files.file.mv('../frontend/shaper/public/images/' + req.files.file.name);
-        console.log(req.files.file)
         return res.status(200).send(req.files.file)
     },
     async create({ body }, res){
@@ -32,7 +32,7 @@ module.exports = {
     },
     async getHouse(req, res){
         console.log(req.params.id)
-        const item = await House.findOne({ProjectId: req.params.id, numHouse: req.params.house_id})
+        let item = await House.findOne({ProjectId: req.params.id, numHouse: req.params.house_id})
         //const shape = await Shapes.findOne({shapeId: item.shapeId})
 
         let shape = {}

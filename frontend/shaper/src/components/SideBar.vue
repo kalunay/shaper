@@ -9,9 +9,9 @@
                 <span class="align-middle">Objects</span>
             </a>
 
-            <!-- <ul class="sidebar-nav" id="myUL">
+            <ul class="sidebar-nav" id="myUL">
                 
-                <router-link 
+                <!-- <router-link 
                     custom                 
                     v-slot="{ href, isExactActive }"
                     v-for="object in objects"
@@ -28,10 +28,25 @@
                         <span class="caret"></span>
                         <side-bar-apartments :projectId="object.ProjectId" />
                     </li>
-                </router-link>
-            </ul>             -->
+                </router-link> -->
 
-            <div id="treeview7" class=""></div>
+                <li 
+                    v-for="object in objects" 
+                    :key="`${object.ProjectId}`"
+                    class="sidebar-item"
+                >
+                    <router-link 
+                        :to="`/object/${object.ProjectId}`" 
+                        class="sidebar-link"
+                    >
+                        <i class="align-middle glyphicon glyphicon-home"></i> 
+                        <span class="align-middle">{{ object.name }}</span>
+                    </router-link>
+                </li>
+                
+            </ul>            
+
+            <!-- <div id="treeview7" class=""></div> -->
 
         </div>
     </nav>
@@ -279,4 +294,13 @@ nav#sidebar.hide {
   height: 100vh;
 }
 
+.sidebar-link {
+    display: flex !important;
+    flex-direction: row;
+    justify-content: start;
+    align-items: baseline;
+}
+.sidebar-link, a.sidebar-link {
+    padding: 5px 25px !important;
+}
 </style>

@@ -1,7 +1,9 @@
+import { ref } from 'vue'
+
 export const canvasModule = {
     state: () => ({
         scale: 1,
-        colorBrush: '#000',
+        colorBrush: ref('#000'),
         fields: {},
         subcoordinates: [],
         shapes: {}
@@ -34,16 +36,18 @@ export const canvasModule = {
             let ctx = canvas.getContext('2d');
             console.log('addImageOnCanvas', state.fields.image)
             // Create our image
-            let newImage = new Image();
-            newImage.src = '/images/' + ((state.fields.image.name) ? state.fields.image.name : state.fields.image)
-            newImage.width = state.fields.width
-            newImage.height = state.fields.height
-
-            // When it loads
-            newImage.onload = () => {
-                console.log(newImage)
-                // Draw the image onto the context with cropping
-                ctx.drawImage(newImage, 0, 0, state.fields.width, state.fields.height)
+            if(state.fields.image !== undefined){
+                let newImage = new Image();
+                newImage.src = '/images/' + ((state.fields.image.name) ? state.fields.image.name : state.fields.image)
+                newImage.width = state.fields.width
+                newImage.height = state.fields.height
+    
+                // When it loads
+                newImage.onload = () => {
+                    console.log(newImage)
+                    // Draw the image onto the context with cropping
+                    ctx.drawImage(newImage, 0, 0, state.fields.width, state.fields.height)
+                }
             }
 
             ctx.lineWidth = 2;
@@ -51,12 +55,18 @@ export const canvasModule = {
             //ctx.scale(this.scale, this.scale)
             let sc = state.scale
             let coord = []
-            let ds = Math.ceil(state.fields.width / state.fields.height)
+            let ds = 1
+            if(sc > 1){
+                ds = Math.ceil(state.fields.width / state.fields.height)
+            }
+
             canvas.onmouseup = function (event) {
                 let x = event.offsetX
                 let y = event.offsetY
                 ctx.lineTo(x, y); //рисуем линию
-                coord.push(Math.ceil((x / sc) / ds) + ',' + Math.ceil((y / sc) / ds))
+                coord.push(Math.ceil((x / sc)) + ',' + Math.ceil((y / sc)))
+                console.log(x,y,sc,ds)
+                //coord.push(Math.ceil((x)) + ',' + Math.ceil((y)))
                 ctx.stroke()
             }
 

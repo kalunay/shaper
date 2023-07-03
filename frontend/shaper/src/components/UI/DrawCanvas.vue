@@ -57,20 +57,20 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
         name: 'DrawCanvas',
         props: {
             fields: {},
-            shapes: {}
+            //shapes: {}
         },
         data(){
             return {
                 listScale: [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
                 svgPath: '',
-                colorBrush: '#000'
+                //colorBrush: '#000'
             }
         },
         watch: {
-            'colorBrush': {
+            'colorBrush.value': {
                 handler(newValue) {
                     this.setBrush(newValue)
-                    console.log(newValue)
+                    console.log('colorBrush',newValue)
                     this.addImageOnCanvas()
                 },
                 immediate: false,
@@ -141,7 +141,7 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
                         ctx.beginPath()
                         element.forEach(elem => {
                             let coords = elem.split(',')
-                            ctx.lineTo(coords[0] * 2, coords[1] * 2)
+                            ctx.lineTo(coords[0], coords[1])
                             ctx.stroke()
                         });
                         ctx.closePath()
@@ -162,6 +162,7 @@ import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
             }, 1000)
             this.setFields(this.fields)
             this.setShapes(this.shapes)
+            console.log(this.colorBrush)
         },
         computed: {
             ...mapState({

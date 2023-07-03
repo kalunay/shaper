@@ -76,7 +76,9 @@
             },
             'fields.floors': {
                 handler(newValue){
-                    this.fields.floors = (Array.isArray(newValue) ? newValue : newValue.split(','))
+                    if(newValue != undefined){
+                        this.fields.floors = (Array.isArray(newValue) ? newValue : newValue.split(','))
+                    }
                 },
                 immediate: false,
             },
@@ -156,8 +158,8 @@
             saveObject(){
 
                 let timeDate = this.fields.shapeId ? this.fields.shapeId : Date.parse(new Date());
-                
-                if(!this.fields.image){
+
+                if(this.fields.image != undefined){
                     let formData = new FormData();
                     formData.append('file', this.fields.image);
                     HouseDataService.upload(formData)
